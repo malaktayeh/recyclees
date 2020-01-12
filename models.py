@@ -33,12 +33,12 @@ class Donors(db.Model):
     __tablename__ = 'Donors'
 
     id = Column(db.Integer, primary_key=True)
-    user_name = Column(db.String, nullable=False)
-    first_name = Column(db.String, nullable=False)
-    last_name = Column(db.String, nullable=False)
+    user_name = Column(db.String(30), nullable=False, unique=True)
+    first_name = Column(db.String(20), nullable=False)
+    last_name = Column(db.String(30), nullable=False)
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
-
+    items = db.relationship('Items', backref='list', lazy=True)
 
     def __init__(self, user_name, first_name, last_name, state, city):
         self.user_name = user_name
@@ -55,7 +55,8 @@ class Donors(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'state': self.state,
-            'city': self.city
+            'city': self.city,
+            'items': self.items
         }
 
 
@@ -67,13 +68,13 @@ class Donees(db.Model):
     __tablename__ = 'Donees'
 
     id = Column(db.Integer, primary_key=True)
-    user_name = Column(db.String, nullable=False)
-    first_name = Column(db.String, nullable=False)
-    last_name = Column(db.String, nullable=False)
+    user_name = Column(db.String(30), nullable=False, unique=True)
+    first_name = Column(db.String(20), nullable=False)
+    last_name = Column(db.String(30), nullable=False)
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
-    organization = Column(db.String)
-
+    organization = Column(db.String(100))
+    item = db.Column(db.Integer, db.ForeignKey('Items.id'), nullable=False)
 
     def __init__(self, user_name, first_name, last_name, state, city, organization):
         self.user_name = user_name
@@ -103,13 +104,15 @@ class Items(db.Model):
     __tablename__ = 'Items'
 
     id = Column(db.Integer, primary_key=True)
-    item_name = Column(db.String, nullable=False)
-    brand = Column(db.String, nullable=False)
-    category = Column(db.String, nullable=False)
-    condition = Column(db.String, nullable=False)
-    description = Column(db.String, nullable=False)
-    delivery = Column(db.String, nullable=False)
+    item_name = Column(db.String(50), nullable=False)
+    brand = Column(db.String(30), nullable=False)
+    category = Column(db.String(30), nullable=False)
+    condition = Column(db.String(30), nullable=False)
+    description = Column(db.String(1000), nullable=False)
+    delivery = Column(db.Boolean, nullable=False, default=False)
     location = Column(db.String, nullable=False)
+    donor = db.Column(db.String(), db.ForeignKey('Donors.user_name'), nullable=False)
+    donee = db.relationship('Donees', backref='list', lazy=True)
 
 
     def __init__(self, item_name, brand, category, condition, description, delivery, location):
