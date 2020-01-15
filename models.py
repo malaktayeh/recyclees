@@ -38,7 +38,7 @@ class Donors(db.Model):
     last_name = Column(db.String(30), nullable=False)
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
-    items = db.relationship('Items', backref='list', lazy=True)
+    items = db.relationship('Donors', backref='items', cascade='all, delete-orphan', lazy=True)
 
     def __init__(self, user_name, first_name, last_name, state, city):
         self.user_name = user_name
@@ -74,7 +74,7 @@ class Donees(db.Model):
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
     organization = Column(db.String(100))
-    item = db.Column(db.Integer, db.ForeignKey('Items.id'), nullable=False)
+    # item = db.Column(db.Integer, db.ForeignKey('Items.id', ondelete='cascade'), nullable=False)
 
     def __init__(self, user_name, first_name, last_name, state, city, organization):
         self.user_name = user_name
@@ -110,19 +110,21 @@ class Items(db.Model):
     condition = Column(db.String(30), nullable=False)
     description = Column(db.String(1000), nullable=False)
     delivery = Column(db.Boolean, nullable=False, default=False)
-    location = Column(db.String, nullable=False)
-    donor = db.Column(db.String(), db.ForeignKey('Donors.user_name'), nullable=False)
-    donee = db.relationship('Donees', backref='list', lazy=True)
+    state = Column(db.String, nullable=False)
+    city = Column(db.String, nullable=False)
+    donor_id = db.Column(db.Integer, db.ForeignKey('Donors.id',ondelete='cascade'), nullable=False)
+    # donee = db.relationship('Donees', backref='donees', lazy=True)
 
 
-    def __init__(self, item_name, brand, category, condition, description, delivery, location):
+    def __init__(self, item_name, brand, category, condition, description, delivery, city, state):
         self.item_name = item_name,
         self.brand = brand,
         self.category = category,
         self.condition = condition,
         self.description = description,
         self.delivery = delivery,
-        self.location = location
+        self.state = state,
+        self.city = city
 
 
     def format(self):
@@ -133,5 +135,6 @@ class Items(db.Model):
             'condition': self.condition,
             'description': self.description,
             'delivery': self.delivery,
-            'location': self.location
+            'state': self.state,
+            'city': self.city
         }
