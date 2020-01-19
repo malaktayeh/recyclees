@@ -40,12 +40,17 @@ class Donors(db.Model):
     city = Column(db.String, nullable=False)
     items = db.relationship('Items', backref='donors', cascade='all, delete-orphan', lazy=True)
 
+
+    def __repr__(self):
+        return f'<Donor {self.id} {self.user_name} {self.first_name} {self.last_name} {self.state} {self.city} >'
+
+
     def __init__(self, user_name, first_name, last_name, state, city, items):
         self.user_name = user_name
         self.first_name = first_name
         self.last_name = last_name
         self.state = state
-        self.city = city
+        self.city = city,
         self.items = items
 
 
@@ -57,7 +62,7 @@ class Donors(db.Model):
             'last_name': self.last_name,
             'state': self.state,
             'city': self.city,
-            'items': self.items
+            'items': json.loads(self.items)
         }
 
 
@@ -77,12 +82,16 @@ class Donees(db.Model):
     organization = Column(db.String(100))
     items = db.relationship('Items', backref='donees', cascade='all', lazy=True)
 
-    def __init__(self, user_name, first_name, last_name, state, city, organization, items):
+
+    def __repr__(self):
+        return f'<Donee {self.id} {self.user_name} {self.first_name} {self.last_name} {self.state} {self.city} {self.organization} >'
+
+
+    def __init__(self, user_name, first_name, last_name, state, city, organization):
         self.user_name = user_name
         self.first_name = first_name
         self.city = city
         self.organization = organization
-        self.items = items
 
 
     def format(self):
@@ -93,8 +102,7 @@ class Donees(db.Model):
             'last_name': self.last_name,
             'state': self.state,
             'city': self.city,
-            'organization': self.organization,
-            'items': self.items
+            'organization': self.organization
         }
 
 '''
@@ -111,19 +119,23 @@ class Items(db.Model):
     condition = Column(db.String(30), nullable=False)
     description = Column(db.String(1000), nullable=False)
     delivery = Column(db.Boolean, nullable=False, default=False)
-    donor_id = db.Column(db.Integer, db.ForeignKey('Donors.id',ondelete='cascade'), nullable=False)
-    donee_id = db.Column(db.Integer, db.ForeignKey('Donees.id'))
+    donor = db.Column(db.String(30), db.ForeignKey('Donors.user_name',ondelete='cascade'), nullable=False)
+    donee = db.Column(db.String(30), db.ForeignKey('Donees.user_name'))
 
 
-    def __init__(self, item_name, brand, category, condition, description, delivery, donor_id, donee_id):
+    def __repr__(self):
+        return f'<Item {self.id} {self.item_name} {self.brand} {self.category} {self.condition} {self.delivery} >'
+
+
+    def __init__(self, item_name, brand, category, condition, description, delivery, donor, donee):
         self.item_name = item_name,
         self.brand = brand,
         self.category = category,
         self.condition = condition,
         self.description = description,
         self.delivery = delivery,
-        self.donor_id,
-        self.donee_id
+        self.donor,
+        self.donee
 
 
     def format(self):
@@ -135,6 +147,5 @@ class Items(db.Model):
             'condition': self.condition,
             'description': self.description,
             'delivery': self.delivery,
-            'donor_id': self.donor_id,
-            'donee_id': self.donee_id
+            'donor': self.donor
         }

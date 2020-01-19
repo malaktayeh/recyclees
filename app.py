@@ -26,7 +26,7 @@ def create_app(test_config=None):
     @cross_origin(headers=["Content-Type", "Authorization"])
     def get_items():
         try:
-            items = [item.format() for item in Items.query.all()]
+            items = [item.format() for item in Items.query.limit(10).all()]
 
             if items is None:
                 abort(400)
@@ -41,22 +41,26 @@ def create_app(test_config=None):
 
     # Route for signed in donor to see a list of posted items up for donation
     # This needs authentication
-    @app.route("/api/public/items/<int:item_id>", methods=["GET"])
+    @app.route("/api/<string:user_name>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    @requires_auth
-    def get_donors_list_of_items(item_id):
+    # @requires_auth
+    def get_donors_list_of_items(user_name):
         try:
-            query = Items.query.filter(Items.id == item_id).first()
-            items = [query.format()]
+            print(user_name)
 
-            print(items)
+            # query = Items.query.join(Donors, ).filter(Items.donor == Donors.user_name)
+            # query = Donors.query.filter_by(user_name=user_name).join(Items).all()
+            items = Items.query.filter(Items.donor==user_name).join(Donors).all()
+            
+            result = [item.format() for item in items]
+            print(result)
 
             if items is None:
                 abort(400)
 
             return jsonify({
                 'success': True,
-                'items': items
+                'items': result
             }), 200
         except Exception:
             abort(404)
