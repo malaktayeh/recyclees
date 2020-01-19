@@ -38,14 +38,15 @@ class Donors(db.Model):
     last_name = Column(db.String(30), nullable=False)
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
-    items = db.relationship('Donors', backref='items', cascade='all, delete-orphan', lazy=True)
+    items = db.relationship('Items', backref='donors', cascade='all, delete-orphan', lazy=True)
 
-    def __init__(self, user_name, first_name, last_name, state, city):
+    def __init__(self, user_name, first_name, last_name, state, city, items):
         self.user_name = user_name
         self.first_name = first_name
         self.last_name = last_name
         self.state = state
         self.city = city
+        self.items = items
 
 
     def format(self):
@@ -74,15 +75,14 @@ class Donees(db.Model):
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
     organization = Column(db.String(100))
-    # item = db.Column(db.Integer, db.ForeignKey('Items.id', ondelete='cascade'), nullable=False)
+    items = db.relationship('Items', backref='donees', cascade='all', lazy=True)
 
-    def __init__(self, user_name, first_name, last_name, state, city, organization):
+    def __init__(self, user_name, first_name, last_name, state, city, organization, items):
         self.user_name = user_name
         self.first_name = first_name
-        self.last_name = last_name
-        self.state = state
         self.city = city
         self.organization = organization
+        self.items = items
 
 
     def format(self):
@@ -93,7 +93,8 @@ class Donees(db.Model):
             'last_name': self.last_name,
             'state': self.state,
             'city': self.city,
-            'organization': self.organization
+            'organization': self.organization,
+            'items': self.items
         }
 
 '''
@@ -110,31 +111,30 @@ class Items(db.Model):
     condition = Column(db.String(30), nullable=False)
     description = Column(db.String(1000), nullable=False)
     delivery = Column(db.Boolean, nullable=False, default=False)
-    state = Column(db.String, nullable=False)
-    city = Column(db.String, nullable=False)
     donor_id = db.Column(db.Integer, db.ForeignKey('Donors.id',ondelete='cascade'), nullable=False)
-    # donee = db.relationship('Donees', backref='donees', lazy=True)
+    donee_id = db.Column(db.Integer, db.ForeignKey('Donees.id'))
 
 
-    def __init__(self, item_name, brand, category, condition, description, delivery, city, state):
+    def __init__(self, item_name, brand, category, condition, description, delivery, donor_id, donee_id):
         self.item_name = item_name,
         self.brand = brand,
         self.category = category,
         self.condition = condition,
         self.description = description,
         self.delivery = delivery,
-        self.state = state,
-        self.city = city
+        self.donor_id,
+        self.donee_id
 
 
     def format(self):
         return {
+            'id': self.id,
             'item_name': self.item_name,
             'brand': self.brand,
             'category': self.category,
             'condition': self.condition,
             'description': self.description,
             'delivery': self.delivery,
-            'state': self.state,
-            'city': self.city
+            'donor_id': self.donor_id,
+            'donee_id': self.donee_id
         }

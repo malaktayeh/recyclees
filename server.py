@@ -10,7 +10,22 @@ AUTH0_DOMAIN = 'recyclees.auth0.com'
 API_AUDIENCE = 'recyclees'
 ALGORITHMS = ["RS256"]
 
-app = Flask(__name__)
+APP = Flask(__name__)
+
+
+# Error handler
+class AuthError(Exception):
+    def __init__(self, error, status_code):
+        self.error = error
+        self.status_code = status_code
+
+
+@APP.errorhandler(AuthError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
+
 
 # Format error response and append status code
 def get_token_auth_header():
@@ -89,6 +104,7 @@ def requires_auth(f):
                         "description": "Unable to find appropriate key"}, 401)
     return decorated
 
+
 def requires_scope(required_scope):
     """Determines if the required scope is present in the Access Token
     Args:
@@ -102,15 +118,3 @@ def requires_scope(required_scope):
                 if token_scope == required_scope:
                     return True
     return False
-
-# Error handler
-class AuthError(Exception):
-    def __init__(self, error, status_code):
-        self.error = error
-        self.status_code = status_code
-
-@app.errorhandler(AuthError)
-def handle_auth_error(ex):
-    response = jsonify(ex.error)
-    response.status_code = ex.status_code
-    return response
