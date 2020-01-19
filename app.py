@@ -43,13 +43,10 @@ def create_app(test_config=None):
     # This needs authentication
     @app.route("/api/<string:user_name>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    # @requires_auth
+    @requires_auth
     def get_donors_list_of_items(user_name):
         try:
             print(user_name)
-
-            # query = Items.query.join(Donors, ).filter(Items.donor == Donors.user_name)
-            # query = Donors.query.filter_by(user_name=user_name).join(Items).all()
             items = Items.query.filter(Items.donor==user_name).join(Donors).all()
             
             result = [item.format() for item in items]
@@ -65,21 +62,66 @@ def create_app(test_config=None):
         except Exception:
             abort(404)
 
+    # TODO: FIX FORMATTING ISSUE WITH INSERTING ITEM INTO DB
+    @app.route("/api/<string:user_name>/items", methods=["POST"])
+    @cross_origin(headers=["Content-Type", "Authorization"])
+    @requires_auth
+    def add_new_item_to_donor_item_list(user_name):
+        body = request.get_json()
+        if body is None:
+            abort(400)
+            
+        print(body)
+        try:
+            name = body.get("item_name")
+            brand = body.get('brand')
+            category = body.get('category')
+            condition = body.get('condition')
+            description = body.get('description')
+            delivery = body.get('delivery')
 
-    # @app.route("/api/items", method=['POST'])
-    # @cross_origin(headers=["Content-Type", "Authorization"])
-    # @requires_auth
-    # def public():
-    #     response = "post a new item"
-    #     return jsonify(message=response)
+            print(condition)
+            item = Items(
+                item_name=name,
+                brand=brand,
+                category=category,
+                condition=condition,
+                description=description,
+                delivery=delivery,
+                donor=user_name,
+                donee=''
+            )
+
+            print(item)
+
+            item.insert()
+
+            return jsonify({
+                'success': True,
+                'items': item
+            }), 200
+        except Exception:
+            abort(404)
 
 
-    # @app.route("/api/items/<int:id>", method=['DELETE'])
-    # @cross_origin(headers=["Content-Type", "Authorization"])
-    # @requires_auth
-    # def public(id):
-    #     response = "delete item with " + id
-    #     return jsonify(message=response)
+    @app.route("/api/<string:user_name>/items/<int:item_id>", methods=["DELETE"])
+    @cross_origin(headers=["Content-Type", "Authorization"])
+    @requires_auth
+    def delete_item_from_donor_item_list(user_name, item_id):
+        item = Items.query.filter(Items.id == item_id).first()
+
+        if item is None:
+            abort(404)
+        
+        try:
+            item.delete()
+
+            return jsonify({
+                'success': True,
+                'delete': item.format()
+            }), 200
+        except Exception:
+            abort(422)
 
 
     # @app.route("/api/items/<int:id>", method=['PATCH'])

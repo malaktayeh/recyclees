@@ -147,5 +147,20 @@ class Items(db.Model):
             'condition': self.condition,
             'description': self.description,
             'delivery': self.delivery,
-            'donor': self.donor
+            'donor': self.donor,
+            'donee': self.donee
         }
+
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+    def update(self):
+        db.session.commit()
