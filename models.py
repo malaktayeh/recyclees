@@ -1,5 +1,4 @@
 import os
-
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
@@ -15,6 +14,7 @@ setup_db(app)
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["CORS_HEADERS"] = "Content-Type"
     db.app = app
     db.init_app(app)
     db.create_all()
@@ -62,7 +62,7 @@ class Donors(db.Model):
             'last_name': self.last_name,
             'state': self.state,
             'city': self.city,
-            'items': json.loads(self.items)
+            'items': self.items
         }
 
 
@@ -124,18 +124,21 @@ class Items(db.Model):
 
 
     def __repr__(self):
-        return f'<Item {self.id} {self.item_name} {self.brand} {self.category} {self.condition} {self.delivery} >'
+        return f'< Item id: {self.id} {self.item_name} {self.brand} {self.category} {self.condition} {self.description} {self.delivery} {self.donor} {self.donee}>'
 
 
-    def __init__(self, item_name, brand, category, condition, description, delivery, donor, donee):
-        self.item_name = item_name,
-        self.brand = brand,
-        self.category = category,
-        self.condition = condition,
-        self.description = description,
-        self.delivery = delivery,
-        self.donor,
-        self.donee
+    # def __init__(self, item_name, brand, category, condition, description, delivery, donor, donee):
+    #     self.item_name = item_name,
+    #     self.brand = brand,
+    #     self.category = category,
+    #     self.condition = condition,
+    #     self.description = description,
+    #     self.delivery = delivery,
+    #     self.donor = donor,
+    #     self.donee = donee
+
+    def __init__(self, **kwargs):
+        super(Items, self).__init__(**kwargs)
 
 
     def format(self):

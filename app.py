@@ -7,6 +7,8 @@ from server import AuthError, requires_auth, requires_scope
 
 from models import db, setup_db, Items, Donors, Donees
 
+
+import json
 app = Flask(__name__)
 
 
@@ -21,7 +23,7 @@ def create_app(test_config=None):
 #----------------------------------------------------------------------------#
 
 
-    # This doesn't need authentication
+    # This doesn't need authentication - returns 10 items
     @app.route("/api/public/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     def get_items():
@@ -43,7 +45,7 @@ def create_app(test_config=None):
     # This needs authentication
     @app.route("/api/<string:user_name>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    @requires_auth
+    # @requires_auth
     def get_donors_list_of_items(user_name):
         try:
             print(user_name)
@@ -62,51 +64,52 @@ def create_app(test_config=None):
         except Exception:
             abort(404)
 
-    # TODO: FIX FORMATTING ISSUE WITH INSERTING ITEM INTO DB
+    # Fix problems with inserting new instance into db - CURRENTLY FAILING
     @app.route("/api/<string:user_name>/items", methods=["POST"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    @requires_auth
+    # @requires_auth
     def add_new_item_to_donor_item_list(user_name):
-        body = request.get_json()
+        body = request.get_json(silent=False)
+        
         if body is None:
             abort(400)
-            
-        print(body)
+
+        item_name = body['item_name']
+        brand = body['brand']
+        category = body['category']
+        condition = body['condition']
+        description = body['description']
+        delivery = body['delivery']
+
+        new_item = Items()
+
+        new_item.item_name = item_name
+        new_item.brand = brand
+        new_item.category = category
+        new_item.condition = condition
+        new_item.description = description
+        new_item.delivery = delivery
+        new_item.donor = user_name
+
         try:
-            name = body.get("item_name")
-            brand = body.get('brand')
-            category = body.get('category')
-            condition = body.get('condition')
-            description = body.get('description')
-            delivery = body.get('delivery')
-
-            print(condition)
-            item = Items(
-                item_name=name,
-                brand=brand,
-                category=category,
-                condition=condition,
-                description=description,
-                delivery=delivery,
-                donor=user_name,
-                donee=''
-            )
-
-            print(item)
-
-            item.insert()
+            print('NOW TRYING TO INSERT INTO DB')
+            print(new_item)
+            new_item.insert()
 
             return jsonify({
                 'success': True,
-                'items': item
+                'items': new_item.format()
             }), 200
         except Exception:
-            abort(404)
+            db.session.rollback()
+            abort(422)
+        finally:
+            db.session.close()
 
 
     @app.route("/api/<string:user_name>/items/<int:item_id>", methods=["DELETE"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    @requires_auth
+    # @requires_auth
     def delete_item_from_donor_item_list(user_name, item_id):
         item = Items.query.filter(Items.id == item_id).first()
 
@@ -124,12 +127,45 @@ def create_app(test_config=None):
             abort(422)
 
 
-    # @app.route("/api/items/<int:id>", method=['PATCH'])
-    # @cross_origin(headers=["Content-Type", "Authorization"])
+    @app.route("/api/<string:user_name>/items/<int:item_id>", methods=["PATCH"])
+    @cross_origin(headers=["Content-Type", "Authorization"])
     # @requires_auth
-    # def public(id):
-    #     response = "update a posted item"
-    #     return jsonify(message=response)
+    def update_or_change_current_item(item_id, user_name):
+        body = request.get_json()
+        item = Items.query.filter(Items.id==item_id).join(Donors).filter(Donors.user_name==user_name).first()
+        print(item)
+
+        if (body is {} is None):
+            abort(400)
+
+        name = body['item_name']
+        brand = body['brand']
+        category = body['category']
+        condition = body['condition']
+        description = body['description']
+        delivery = body['delivery']
+
+        try:
+            item.item_name = name
+            item.brand = brand
+            item.category = category
+            item.condition = condition
+            item.description = description
+            item.delivery = delivery
+            item.donor = user_name
+
+            item.update()
+            
+            return jsonify({
+                "success": True,
+                "items": item.format()
+            }), 200
+        except Exception:
+            db.session.rollback()
+            abort(422)
+        finally:
+            db.session.close()
+
 
 
 #----------------------------------------------------------------------------#
@@ -193,6 +229,15 @@ def create_app(test_config=None):
             'error': 405,
             'message': 'Method not allowed'
         }), 405
+
+
+    @app.errorhandler(422)
+    def method_not_allowed(error):
+        return jsonify({
+            'success': False,
+            'error': 422,
+            'message': 'Unprocessable'
+        }), 422
 
 
     @app.errorhandler(500)
