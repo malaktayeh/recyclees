@@ -43,13 +43,12 @@ def create_app(test_config=None):
 
     # Route for signed in donor to see a list of posted items up for donation
     # This needs authentication
-    @app.route("/api/<string:user_name>/items", methods=["GET"])
+    @app.route("/api/donors/<int:user_id>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    # @requires_auth
-    def get_donors_list_of_items(user_name):
+    @requires_auth
+    def get_donors_list_of_items(user_id):
         try:
-            print(user_name)
-            items = Items.query.filter(Items.donor==user_name).join(Donors).all()
+            items = Items.query.filter(Items.id==user_id).join(Donors).all()
             
             result = [item.format() for item in items]
             print(result)
@@ -64,11 +63,11 @@ def create_app(test_config=None):
         except Exception:
             abort(404)
 
-    # Fix problems with inserting new instance into db - CURRENTLY FAILING
-    @app.route("/api/<string:user_name>/items", methods=["POST"])
+    # Fix problems with inserting new instance into db - delivery as bool is problematic
+    @app.route("/api/donors/<int:user_id>/items", methods=["POST"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    # @requires_auth
-    def add_new_item_to_donor_item_list(user_name):
+    @requires_auth
+    def add_new_item_to_donor_item_list(user_id):
         body = request.get_json(silent=False)
         
         if body is None:
@@ -79,7 +78,7 @@ def create_app(test_config=None):
         category = body['category']
         condition = body['condition']
         description = body['description']
-        delivery = body['delivery']
+        # delivery = body['delivery']
 
         new_item = Items()
 
@@ -88,12 +87,10 @@ def create_app(test_config=None):
         new_item.category = category
         new_item.condition = condition
         new_item.description = description
-        new_item.delivery = delivery
-        new_item.donor = user_name
+        # new_item.delivery = delivery
+        new_item.donor = user_id
 
         try:
-            print('NOW TRYING TO INSERT INTO DB')
-            print(new_item)
             new_item.insert()
 
             return jsonify({
@@ -107,15 +104,13 @@ def create_app(test_config=None):
             db.session.close()
 
 
-    @app.route("/api/<string:user_name>/items/<int:item_id>", methods=["DELETE"])
+    @app.route("/api/donors/<int:user_id>/items/<int:item_id>", methods=["DELETE"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    # @requires_auth
-    def delete_item_from_donor_item_list(user_name, item_id):
+    @requires_auth
+    def delete_item_from_donor_item_list(user_id, item_id):
         item = Items.query.filter(Items.id == item_id).first()
-
         if item is None:
             abort(404)
-        
         try:
             item.delete()
 
@@ -127,18 +122,18 @@ def create_app(test_config=None):
             abort(422)
 
 
-    @app.route("/api/<string:user_name>/items/<int:item_id>", methods=["PATCH"])
+    @app.route("/api/donors/<int:user_id>/items/<int:item_id>", methods=["PATCH"])
     @cross_origin(headers=["Content-Type", "Authorization"])
-    # @requires_auth
-    def update_or_change_current_item(item_id, user_name):
+    @requires_auth
+    def update_or_change_current_item(item_id, user_id):
         body = request.get_json()
-        item = Items.query.filter(Items.id==item_id).join(Donors).filter(Donors.user_name==user_name).first()
+        item = Items.query.filter(Items.id==item_id).join(Donors).filter(Donors.id==user_id).first()
         print(item)
 
         if (body is {} is None):
             abort(400)
 
-        name = body['item_name']
+        item_name = body['item_name']
         brand = body['brand']
         category = body['category']
         condition = body['condition']
@@ -146,13 +141,13 @@ def create_app(test_config=None):
         delivery = body['delivery']
 
         try:
-            item.item_name = name
+            item.item_name = item_name
             item.brand = brand
             item.category = category
             item.condition = condition
             item.description = description
             item.delivery = delivery
-            item.donor = user_name
+            item.donor = user_id
 
             item.update()
             
@@ -194,6 +189,10 @@ def create_app(test_config=None):
     #         "description": "You don't have access to this resource"
     #     }, 403)
 
+
+#----------------------------------------------------------------------------#
+# Error handler routes
+#----------------------------------------------------------------------------#
 
     @app.errorhandler(401)
     def not_authorized(error):

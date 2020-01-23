@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, String, Integer, create_engine
+from sqlalchemy import Column, String, Integer, Boolean, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
@@ -119,23 +119,13 @@ class Items(db.Model):
     condition = Column(db.String(30), nullable=False)
     description = Column(db.String(1000), nullable=False)
     delivery = Column(db.Boolean, nullable=False, default=False)
-    donor = db.Column(db.String(30), db.ForeignKey('Donors.user_name',ondelete='cascade'), nullable=False)
-    donee = db.Column(db.String(30), db.ForeignKey('Donees.user_name'))
+    donor = db.Column(db.Integer, db.ForeignKey('Donors.id',ondelete='cascade'), nullable=False)
+    donee = db.Column(db.Integer, db.ForeignKey('Donees.id'))
 
 
     def __repr__(self):
         return f'< Item id: {self.id} {self.item_name} {self.brand} {self.category} {self.condition} {self.description} {self.delivery} {self.donor} {self.donee}>'
 
-
-    # def __init__(self, item_name, brand, category, condition, description, delivery, donor, donee):
-    #     self.item_name = item_name,
-    #     self.brand = brand,
-    #     self.category = category,
-    #     self.condition = condition,
-    #     self.description = description,
-    #     self.delivery = delivery,
-    #     self.donor = donor,
-    #     self.donee = donee
 
     def __init__(self, **kwargs):
         super(Items, self).__init__(**kwargs)
