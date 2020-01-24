@@ -19,7 +19,7 @@ def create_app(test_config=None):
     CORS(app)
 
 #----------------------------------------------------------------------------#
-# Item routes
+# Public routes
 #----------------------------------------------------------------------------#
 
 
@@ -28,17 +28,29 @@ def create_app(test_config=None):
     @cross_origin(headers=["Content-Type", "Authorization"])
     def get_items():
         try:
-            items = [item.format() for item in Items.query.limit(10).all()]
+            items = [item.format() for item in Items.query.filter(Items.donee == None).limit(10).all()]
 
-            if items is None:
-                abort(400)
+            # returns message for successful api call but no items to claim
+            if not items:
+                return jsonify({
+                    'success': True,
+                    'message': 'All items are claimed, sorry. Come back at a later time for better luck!',
+                    'items': items
+                }), 200
 
+            # return max of 10 items which are not claimed yet
             return jsonify({
                 'success': True,
+                'message': 'These items are up for grabs! Sign in to claim.'
                 'items': items
             }), 200
         except Exception:
             abort(404)
+
+
+#----------------------------------------------------------------------------#
+# Donor routes
+#----------------------------------------------------------------------------#
 
 
     # Route for signed in donor to see a list of posted items up for donation
@@ -62,6 +74,7 @@ def create_app(test_config=None):
             }), 200
         except Exception:
             abort(404)
+
 
     # Fix problems with inserting new instance into db - delivery as bool is problematic
     @app.route("/api/donors/<int:user_id>/items", methods=["POST"])
@@ -160,7 +173,6 @@ def create_app(test_config=None):
             abort(422)
         finally:
             db.session.close()
-
 
 
 #----------------------------------------------------------------------------#
