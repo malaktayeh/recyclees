@@ -168,13 +168,28 @@ def create_app(test_config=None):
 #----------------------------------------------------------------------------#
 
 
+    # Route for signed in donor to see a list of posted items up for donation
     # This needs authentication
-    # @app.route("/api/profile")
-    # @cross_origin(headers=["Content-Type", "Authorization"])
+    @app.route("/api/donees/<int:user_id>/items", methods=["GET"])
+    @cross_origin(headers=["Content-Type", "Authorization"])
     # @requires_auth
-    # def private():
-    #     response = "Hello from a private endpoint! You need to be authenticated to see this."
-    #     return jsonify(message=response)
+    def get_donees_list_of_items(user_id):
+        # try:
+        items = Items.query.filter(Items.donee==user_id).join(Donees).all()
+        
+        result = [item.format() for item in items]
+        print(result)
+
+        if items is None:
+            abort(400)
+
+        return jsonify({
+            'success': True,
+            'items': result
+        }), 200
+        # except Exception:
+        #     abort(404)
+
 
     # This needs authorization
     # @app.route("/api/private-scoped")
