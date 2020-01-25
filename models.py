@@ -11,6 +11,8 @@ db = SQLAlchemy()
 setup_db(app)
     binds a flask application and a SQLAlchemy service
 '''
+
+
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -19,16 +21,16 @@ def setup_db(app, database_path=database_path):
     db.create_all()
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 # Models.
-#----------------------------------------------------------------------------#
-
+# ----------------------------------------------------------------------------#
 
 '''
 Donor
 '''
 
-class Donors(db.Model):  
+
+class Donors(db.Model):
     __tablename__ = 'Donors'
 
     id = Column(db.Integer, primary_key=True)
@@ -37,12 +39,12 @@ class Donors(db.Model):
     last_name = Column(db.String(30), nullable=False)
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
-    items = db.relationship('Items', backref='donors', cascade='all, delete-orphan', lazy=True)
-
+    items = db.relationship('Items', backref='donors',
+                            cascade='all, delete-orphan', lazy=True)
 
     def __repr__(self):
-        return f'<Donor {self.id} {self.user_name} {self.first_name} {self.last_name} {self.state} {self.city} >'
-
+        return f'<Donor {self.id} {self.user_name} {self.first_name} \
+                 {self.last_name} {self.state} {self.city} >'
 
     def __init__(self, user_name, first_name, last_name, state, city, items):
         self.user_name = user_name
@@ -51,7 +53,6 @@ class Donors(db.Model):
         self.state = state
         self.city = city,
         self.items = items
-
 
     def format(self):
         return {
@@ -69,7 +70,8 @@ class Donors(db.Model):
 Donee
 '''
 
-class Donees(db.Model):  
+
+class Donees(db.Model):
     __tablename__ = 'Donees'
 
     id = Column(db.Integer, primary_key=True)
@@ -79,19 +81,20 @@ class Donees(db.Model):
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
     organization = Column(db.String(100))
-    items = db.relationship('Items', backref='donees', cascade='all', lazy=True)
-
+    items = db.relationship('Items', backref='donees', cascade='all',
+                            lazy=True)
 
     def __repr__(self):
-        return f'<Donee {self.id} {self.user_name} {self.first_name} {self.last_name} {self.state} {self.city} {self.organization} >'
+        return f'<Donee {self.id} {self.user_name} {self.first_name} \
+                 {self.last_name} {self.state} {self.city} \
+                 {self.organization} >'
 
-
-    def __init__(self, user_name, first_name, last_name, state, city, organization):
+    def __init__(self, user_name, first_name, last_name, state,
+                 city, organization):
         self.user_name = user_name
         self.first_name = first_name
         self.city = city
         self.organization = organization
-
 
     def format(self):
         return {
@@ -104,11 +107,13 @@ class Donees(db.Model):
             'organization': self.organization
         }
 
+
 '''
 Item
 '''
 
-class Items(db.Model):  
+
+class Items(db.Model):
     __tablename__ = 'Items'
 
     id = Column(db.Integer, primary_key=True)
@@ -118,17 +123,17 @@ class Items(db.Model):
     condition = Column(db.String(30), nullable=False)
     description = Column(db.String(1000), nullable=False)
     delivery = Column(db.String(5), nullable=False, default=False)
-    donor = db.Column(db.Integer, db.ForeignKey('Donors.id',ondelete='cascade'), nullable=False)
+    donor = db.Column(db.Integer, db.ForeignKey
+                      ('Donors.id', ondelete='cascade'), nullable=False)
     donee = db.Column(db.Integer, db.ForeignKey('Donees.id'))
 
-
     def __repr__(self):
-        return f'< Item id: {self.id} {self.item_name} {self.brand} {self.category} {self.condition} {self.description} {self.delivery} {self.donor} {self.donee}>'
-
+        return f'< Item id: {self.id} {self.item_name} {self.brand} \
+                {self.category} {self.condition} {self.description} \
+                {self.delivery} {self.donor} {self.donee}>'
 
     def __init__(self, **kwargs):
         super(Items, self).__init__(**kwargs)
-
 
     def format(self):
         return {
@@ -143,16 +148,13 @@ class Items(db.Model):
             'donee': self.donee
         }
 
-
     def insert(self):
         db.session.add(self)
         db.session.commit()
 
-
     def delete(self):
         db.session.delete(self)
         db.session.commit()
-
 
     def update(self):
         db.session.commit()

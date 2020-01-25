@@ -18,24 +18,24 @@ def create_app(test_config=None):
     setup_db(app)
     CORS(app)
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 # Public routes
-#----------------------------------------------------------------------------#
-
+# ----------------------------------------------------------------------------#
 
     # This doesn't need authentication - returns 10 items
     @app.route("/api/public/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     def get_items():
         try:
-            items = [item.format() for item in Items.query.filter(Items.donee == None).limit(10).all()]
-            print(items)
+            items = [item.format() for item in
+                     Items.query.filter(Items.donee == None).limit(10).all()]
 
             # returns message for successful api call but no items to claim
             if not items:
                 return jsonify({
                     'success': True,
-                    'message': 'All items are claimed, sorry. Come back at a later time for better luck!',
+                    'message': 'All items are claimed, sorry. Come back at \
+                                 a later time for better luck!',
                     'items': items
                 }), 200
 
@@ -49,23 +49,21 @@ def create_app(test_config=None):
             abort(404)
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 # Donor routes
-#----------------------------------------------------------------------------#
-
+# ----------------------------------------------------------------------------#
 
     # Route for signed in donor to see a list of posted items up for donation
     @app.route("/api/donors/<int:user_id>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def get_donors_list_of_items(user_id):
+        # check if user has the right to access items
         if requires_scope("get:items"):
-
             try:
-                items = Items.query.filter(Items.donor==user_id).join(Donors).all()
-                
+                items = Items.query.filter(Items.donor == user_id)
+                .join(Donors).all()
                 result = [item.format() for item in items]
-                print(result)
 
                 if items is None:
                     abort(400)
@@ -77,20 +75,22 @@ def create_app(test_config=None):
             except Exception:
                 abort(404)
 
+        # return error if donor does not have the permission to get items
         raise AuthError({
             "code": "Unauthorized",
             "description": "You don't have access to this resource"
         }, 403)
 
-
-    # Fix problems with inserting new instance into db - delivery as bool is problematic
+    # Route for signed in donor to add a new item to database
     @app.route("/api/donors/<int:user_id>/items", methods=["POST"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def add_new_item_to_donor_item_list(user_id):
+        # check if user has the right to update items
         if requires_scope("update:items"):
+            # get json data from user
             body = request.get_json(silent=False)
-            
+
             if body is None:
                 abort(400)
 
@@ -101,8 +101,10 @@ def create_app(test_config=None):
             description = body['description']
             delivery = body['delivery']
 
+            # create new item instance
             new_item = Items()
 
+            # insert data into new instance
             new_item.item_name = item_name
             new_item.brand = brand
             new_item.category = category
@@ -113,7 +115,6 @@ def create_app(test_config=None):
 
             try:
                 new_item.insert()
-
                 return jsonify({
                     'success': True,
                     'items': new_item.format()
@@ -124,18 +125,24 @@ def create_app(test_config=None):
             finally:
                 db.session.close()
 
+        # return error if donor does not have the permission
+        # to get add new item(s)
         raise AuthError({
             "code": "Unauthorized",
             "description": "You don't have access to this resource"
         }, 403)
 
-
-    @app.route("/api/donors/<int:user_id>/items/<int:item_id>", methods=["DELETE"])
+    # Route for signed in donor to delete an item from database
+    @app.route("/api/donors/<int:user_id>/items/<int:item_id>",
+               methods=["DELETE"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def delete_item_from_donor_item_list(user_id, item_id):
+        # check if user has the right to delete items
         if requires_scope("delete:items"):
-            item = Items.query.filter(Items.id == item_id).first()
+            item = Items.query.filter(Items.id == item_id).join(Donors)
+            .filter(Donors.id == user_id).first()
+
             if item is None:
                 abort(404)
             try:
@@ -147,21 +154,26 @@ def create_app(test_config=None):
                 }), 200
             except Exception:
                 abort(422)
-        
+
+        # return error if donor does not have the permission to delete item(s)
         raise AuthError({
             "code": "Unauthorized",
             "description": "You don't have access to this resource"
         }, 403)
 
-
-    @app.route("/api/donors/<int:user_id>/items/<int:item_id>", methods=["PATCH"])
+    # Route for signed in donor to update an item
+    @app.route("/api/donors/<int:user_id>/items/<int:item_id>",
+               methods=["PATCH"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def update_or_change_current_item(item_id, user_id):
+        # check if user has the right to update items
         if requires_scope("update:items"):
+            # get json data from user
             body = request.get_json()
-            item = Items.query.filter(Items.id==item_id).join(Donors).filter(Donors.id==user_id).first()
-            print(item)
+
+            item = Items.query.filter(Items.id == item_id).join(Donors)
+            .filter(Donors.id == user_id).first()
 
             if (body is {} is None):
                 abort(400)
@@ -174,6 +186,7 @@ def create_app(test_config=None):
             delivery = body['delivery']
 
             try:
+                # replace old instance data with new from PATCH request
                 item.item_name = item_name
                 item.brand = brand
                 item.category = category
@@ -182,8 +195,9 @@ def create_app(test_config=None):
                 item.delivery = delivery
                 item.donor = user_id
 
+                # update instance in database
                 item.update()
-                
+
                 return jsonify({
                     "success": True,
                     "items": item.format()
@@ -193,28 +207,30 @@ def create_app(test_config=None):
                 abort(422)
             finally:
                 db.session.close()
+
+        # return error if donor does not have the permission to edit item(s)
         raise AuthError({
             "code": "Unauthorized",
             "description": "You don't have access to this resource"
         }, 403)
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 # Profile route
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
-
-    # Route for signed in donee to see a list of claimed items 
+    # Route for signed in donee to see a list of claimed items
     @app.route("/api/donees/<int:user_id>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def get_donees_list_of_items(user_id):
+        # check if user has the right to get items
         if requires_scope("get:items"):
             try:
-                items = Items.query.filter(Items.donee==user_id).join(Donees).all()
-                
+                items = Items.query.filter(Items.donee == user_id)
+                .join(Donees).all()
+
                 result = [item.format() for item in items]
-                print(result)
 
                 return jsonify({
                     'success': True,
@@ -223,30 +239,31 @@ def create_app(test_config=None):
             except Exception:
                 abort(404)
 
+        # return error if donor does not have the permission to see item(s)
         raise AuthError({
             "code": "Unauthorized",
             "description": "You don't have access to this resource"
         }, 403)
 
-
     # Route for signed in donee to claim an unclaimed item
-    @app.route("/api/donees/<int:user_id>/items/<int:item_id>", methods=["PATCH"])
+    @app.route("/api/donees/<int:user_id>/items/<int:item_id>",
+               methods=["PATCH"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def donee_claim_item(user_id, item_id):
+        # check if user has the right to update items
         if requires_scope("update:items"):
             try:
-                item = Items.query.filter(Items.id==item_id).join(Donors).first()
-                
+                item = Items.query.filter(Items.id == item_id)
+                .join(Donors).first()
+
                 if item is None:
                     abort(400)
 
                 item.donee = user_id
-                
-                print(item)
 
                 item.update()
-                    
+
                 return jsonify({
                     "success": True,
                     "items": item.format()
@@ -254,15 +271,16 @@ def create_app(test_config=None):
             except Exception:
                 abort(404)
 
+        # return error if donor does not have the permission to edit item(s)
         raise AuthError({
             "code": "Unauthorized",
             "description": "You don't have access to this resource"
         }, 403)
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 # Error handler routes
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
     @app.errorhandler(401)
     def not_authorized(error):
@@ -272,7 +290,6 @@ def create_app(test_config=None):
             "message": "Not authorized"
         }), 401
 
-
     @app.errorhandler(403)
     def forbidden(error):
         return jsonify({
@@ -280,7 +297,6 @@ def create_app(test_config=None):
             "error": 403,
             "message": "Forbidden"
         }), 403
-
 
     @app.errorhandler(404)
     def not_found(error):
@@ -290,7 +306,6 @@ def create_app(test_config=None):
             'message': 'Not found'
         }), 404
 
-
     @app.errorhandler(405)
     def method_not_allowed(error):
         return jsonify({
@@ -298,7 +313,6 @@ def create_app(test_config=None):
             'error': 405,
             'message': 'Method not allowed'
         }), 405
-
 
     @app.errorhandler(422)
     def method_not_allowed(error):
@@ -308,7 +322,6 @@ def create_app(test_config=None):
             'message': 'Unprocessable'
         }), 422
 
-
     @app.errorhandler(500)
     def server_error(error):
         return jsonify({
@@ -316,7 +329,6 @@ def create_app(test_config=None):
             "error": 500,
             "message": "Internal server error"
         }), 500
-
 
     '''
         Implement error handler for AuthError
@@ -332,6 +344,7 @@ def create_app(test_config=None):
         }), error.status_code
 
     return app
+
 
 app = create_app()
 
