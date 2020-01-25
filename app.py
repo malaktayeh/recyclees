@@ -57,7 +57,7 @@ def create_app(test_config=None):
     @app.route("/api/donors/<int:user_id>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
-    @requires_scope('get:items')
+    # @requires_scope('get:items')
     def get_donors_list_of_items(user_id):
         try:
             items = Items.query.filter(Items.donor==user_id).join(Donors).all()
@@ -80,7 +80,7 @@ def create_app(test_config=None):
     @app.route("/api/donors/<int:user_id>/items", methods=["POST"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
-    @requires_scope('update:items')
+    # @requires_scope('update:items')
     def add_new_item_to_donor_item_list(user_id):
         body = request.get_json(silent=False)
         
@@ -121,7 +121,7 @@ def create_app(test_config=None):
     @app.route("/api/donors/<int:user_id>/items/<int:item_id>", methods=["DELETE"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
-    @requires_scope('delete:items')
+    # @requires_scope('delete:items')
     def delete_item_from_donor_item_list(user_id, item_id):
         item = Items.query.filter(Items.id == item_id).first()
         if item is None:
@@ -140,7 +140,7 @@ def create_app(test_config=None):
     @app.route("/api/donors/<int:user_id>/items/<int:item_id>", methods=["PATCH"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
-    @requires_scope('update:items')
+    # @requires_scope('update:items')
     def update_or_change_current_item(item_id, user_id):
         body = request.get_json()
         item = Items.query.filter(Items.id==item_id).join(Donors).filter(Donors.id==user_id).first()
@@ -187,7 +187,7 @@ def create_app(test_config=None):
     @app.route("/api/donees/<int:user_id>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
-    @requires_scope('get:items')
+    # @requires_scope('get:items')
     def get_donees_list_of_items(user_id):
         try:
             items = Items.query.filter(Items.donee==user_id).join(Donees).all()
@@ -207,7 +207,7 @@ def create_app(test_config=None):
     @app.route("/api/donees/<int:user_id>/items/<int:item_id>", methods=["PATCH"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
-    @requires_scope('update:items')
+    # @requires_scope('update:items')
     def donee_claim_item(user_id, item_id):
         try:
             item = Items.query.filter(Items.id==item_id).join(Donors).first()
