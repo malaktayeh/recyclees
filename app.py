@@ -54,7 +54,6 @@ def create_app(test_config=None):
 
 
     # Route for signed in donor to see a list of posted items up for donation
-    # This needs authentication
     @app.route("/api/donors/<int:user_id>/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
@@ -199,6 +198,32 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'items': result
+            }), 200
+        except Exception:
+            abort(404)
+
+
+    # Route for signed in donee to claim an unclaimed item
+    @app.route("/api/donees/<int:user_id>/items/<int:item_id>", methods=["PATCH"])
+    @cross_origin(headers=["Content-Type", "Authorization"])
+    @requires_auth
+    @requires_scope('update:items')
+    def donee_claim_item(user_id, item_id):
+        try:
+            item = Items.query.filter(Items.id==item_id).join(Donors).first()
+            
+            if item is None:
+                abort(400)
+
+            item.donee = user_id
+            
+            print(item)
+
+            item.update()
+                
+            return jsonify({
+                "success": True,
+                "items": item.format()
             }), 200
         except Exception:
             abort(404)
