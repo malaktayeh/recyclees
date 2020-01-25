@@ -16,7 +16,6 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    print(database_path)
     db.create_all()
 
 
@@ -118,7 +117,7 @@ class Items(db.Model):
     category = Column(db.String(30), nullable=False)
     condition = Column(db.String(30), nullable=False)
     description = Column(db.String(1000), nullable=False)
-    delivery = Column(db.Boolean, nullable=False, default=False)
+    delivery = Column(db.String(5), nullable=False, default=False)
     donor = db.Column(db.Integer, db.ForeignKey('Donors.id',ondelete='cascade'), nullable=False)
     donee = db.Column(db.Integer, db.ForeignKey('Donees.id'))
 
