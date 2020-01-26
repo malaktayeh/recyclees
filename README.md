@@ -1,8 +1,11 @@
 # Recyclees
 
-## Project description
+## Introduction
 An app with routes which performs CRUD operations on a Heroku PSQL database.
 
+## Getting started
+- Base URL: https://recyclees.herokuapp.com/
+- Authentication: ...
 
 ## API Endpoints
 
@@ -22,7 +25,19 @@ https://recyclees.herokuapp.com/api/donors
 Result:
 
 ```json
-{"donor":{"city":"Jersey City","first_name":"Peter","id":1,"items":[],"last_name":"Smith","state":"New Jersey","user_name":"peter_smith"},"success":true}
+{
+    "donor":
+    {
+        "city":"Jersey City",
+        "first_name":"Peter",
+        "id":1,
+        "items":[],
+        "last_name":"Smith",
+        "state":"New Jersey",
+        "user_name":"peter_smith"
+    },
+    "success":true
+}
 
 ```
 
@@ -41,5 +56,17 @@ https://recyclees.herokuapp.com/api/donees
 Result:
 
 ```json
-{"donor":{"city":"Hartford","first_name":"Melissa","id":1,"items":[],"last_name":"Grant","organization":"Homeless Shelter in Hartford, CT","state":"Connecticut","user_name":"HSCT"},"success":true}
+{
+    "donor":
+    {
+        "city":"Hartford",
+        "first_name":"Melissa",
+        "id":1,"items":[],
+        "last_name":"Grant",
+        "organization":"Homeless Shelter in Hartford, CT",
+        "state":"Connecticut",
+        "user_name":"HSCT"
+    },
+    "success":true
+}
 ```
