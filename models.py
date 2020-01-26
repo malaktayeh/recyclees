@@ -3,8 +3,8 @@ from sqlalchemy import Column, String, Integer, Boolean, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-database_path = os.environ['DATABASE_URL']
-# database_path = 'postgresql://postgres@localhost:5432/recyclees'
+# database_path = os.environ['DATABASE_URL']
+database_path = 'postgresql://postgres@localhost:5432/recyclees'
 db = SQLAlchemy()
 
 '''
@@ -46,13 +46,12 @@ class Donors(db.Model):
         return f'<Donor {self.id} {self.user_name} {self.first_name} \
                  {self.last_name} {self.state} {self.city} >'
 
-    def __init__(self, user_name, first_name, last_name, state, city, items):
+    def __init__(self, user_name, first_name, last_name, state, city):
         self.user_name = user_name
         self.first_name = first_name
         self.last_name = last_name
         self.state = state
-        self.city = city,
-        self.items = items
+        self.city = city
 
     def format(self):
         return {
@@ -64,6 +63,17 @@ class Donors(db.Model):
             'city': self.city,
             'items': self.items
         }
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
 
 
 '''
@@ -80,7 +90,7 @@ class Donees(db.Model):
     last_name = Column(db.String(30), nullable=False)
     state = Column(db.String, nullable=False)
     city = Column(db.String, nullable=False)
-    organization = Column(db.String(100))
+    organization = Column(db.String(100), nullable=True)
     items = db.relationship('Items', backref='donees', cascade='all',
                             lazy=True)
 
@@ -93,7 +103,9 @@ class Donees(db.Model):
                  city, organization):
         self.user_name = user_name
         self.first_name = first_name
+        self.last_name = last_name
         self.city = city
+        self.state = state
         self.organization = organization
 
     def format(self):
@@ -104,8 +116,20 @@ class Donees(db.Model):
             'last_name': self.last_name,
             'state': self.state,
             'city': self.city,
-            'organization': self.organization
+            'organization': self.organization,
+            'items': self.items
         }
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
 
 
 '''
