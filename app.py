@@ -61,8 +61,8 @@ def create_app(test_config=None):
         # check if user has the right to access items
         if requires_scope("get:items"):
             try:
-                items = Items.query.filter(Items.donor == user_id)
-                .join(Donors).all()
+                items = Items.query.filter(Items.donor == user_id) \
+                        .join(Donors).all()
                 result = [item.format() for item in items]
 
                 if items is None:
@@ -117,7 +117,7 @@ def create_app(test_config=None):
                 new_item.insert()
                 return jsonify({
                     'success': True,
-                    'items': new_item.format()
+                    'item': new_item.format()
                 }), 200
             except Exception:
                 abort(422)
@@ -137,8 +137,8 @@ def create_app(test_config=None):
     def delete_item_from_donor_item_list(user_id, item_id):
         # check if user has the right to delete items
         if requires_scope("delete:items"):
-            item = Items.query.filter(Items.id == item_id).join(Donors)
-            .filter(Donors.id == user_id).first()
+            item = Items.query.filter(Items.id == item_id).join(Donors) \
+                 .filter(Donors.id == user_id).first()
 
             if item is None:
                 abort(404)
@@ -147,7 +147,7 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'delete': item.format()
+                    'deleted': item.format()
                 }), 200
             except Exception:
                 abort(422)
@@ -169,8 +169,8 @@ def create_app(test_config=None):
             # get json data from user
             body = request.get_json()
 
-            item = Items.query.filter(Items.id == item_id).join(Donors)
-            .filter(Donors.id == user_id).first()
+            item = Items.query.filter(Items.id == item_id).join(Donors) \
+                .filter(Donors.id == user_id).first()
 
             if (body is {} is None):
                 abort(400)
@@ -197,13 +197,10 @@ def create_app(test_config=None):
 
                 return jsonify({
                     "success": True,
-                    "items": item.format()
+                    "updated_item": item.format()
                 }), 200
             except Exception:
-                db.session.rollback()
                 abort(422)
-            finally:
-                db.session.close()
 
         # return error if donor does not have the permission to edit item(s)
         raise AuthError({
@@ -213,7 +210,7 @@ def create_app(test_config=None):
 
 
 # ----------------------------------------------------------------------------#
-# Profile route
+# Donee routes
 # ----------------------------------------------------------------------------#
 
     # Route for signed in donee to see a list of claimed items
@@ -224,8 +221,8 @@ def create_app(test_config=None):
         # check if user has the right to get items
         if requires_scope("get:items"):
             try:
-                items = Items.query.filter(Items.donee == user_id)
-                .join(Donees).all()
+                items = Items.query.filter(Items.donee == user_id) \
+                        .join(Donees).all()
 
                 result = [item.format() for item in items]
 
@@ -251,8 +248,8 @@ def create_app(test_config=None):
         # check if user has the right to update items
         if requires_scope("update:items"):
             try:
-                item = Items.query.filter(Items.id == item_id)
-                .join(Donors).first()
+                item = Items.query.filter(Items.id == item_id) \
+                       .join(Donors).first()
 
                 if item is None:
                     abort(400)
@@ -284,78 +281,87 @@ def create_app(test_config=None):
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def add_new_donor_to_database():
-        # get json data from user
-        body = request.get_json(silent=False)
+        if requires_scope("create:users"):
+            # get json data from user
+            body = request.get_json(silent=False)
 
-        if body is None:
-            abort(400)
+            if body is None:
+                abort(400)
 
-        user_name = body['user_name']
-        first_name = body['first_name']
-        last_name = body['last_name']
-        state = body['state']
-        city = body['city']
+            user_name = body['user_name']
+            first_name = body['first_name']
+            last_name = body['last_name']
+            state = body['state']
+            city = body['city']
 
-        # create new Donor instance
-        new_donor = Donors(
-            user_name = user_name,
-            first_name = first_name,
-            last_name = last_name,
-            state = state,
-            city = city
-        )
+            # create new Donor instance
+            new_donor = Donors(
+                user_name=user_name,
+                first_name=first_name,
+                last_name=last_name,
+                state=state,
+                city=city
+            )
 
-        try:
-            new_donor.insert()
-            return jsonify({
-                'success': True,
-                'donor': new_donor.format()
-            }), 200
-        except Exception:
-            db.session.rollback()
-            abort(422)
-        finally:
-            db.session.close()
+            try:
+                new_donor.insert()
+                return jsonify({
+                    'success': True,
+                    'new_donor': new_donor.format()
+                }), 200
+            except Exception:
+                abort(422)
 
+        # return error if donor does not have the permission to edit item(s)
+        raise AuthError({
+            "code": "Unauthorized",
+            "description": "You don't have access to this resource"
+        }, 403)
 
     # Route for adding a donee to database
     @app.route("/api/donees", methods=["POST"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     @requires_auth
     def add_new_donee_to_database():
-        # get json data from user
-        body = request.get_json(silent=False)
+        if requires_scope("create:users"):
+            # get json data from user
+            body = request.get_json(silent=False)
 
-        if body is None:
-            abort(400)
+            if body is None:
+                abort(400)
 
-        user_name = body['user_name']
-        first_name = body['first_name']
-        last_name = body['last_name']
-        state = body['state']
-        city = body['city']
-        organization = body['organization']
+            user_name = body['user_name']
+            first_name = body['first_name']
+            last_name = body['last_name']
+            state = body['state']
+            city = body['city']
+            organization = body['organization']
 
-        # create new Donee instance
-        new_donee = Donees(
-            user_name = user_name,
-            first_name = first_name,
-            last_name = last_name,
-            state = state,
-            city = city,
-            organization = organization
-        )
+            # create new Donee instance
+            new_donee = Donees(
+                user_name=user_name,
+                first_name=first_name,
+                last_name=last_name,
+                state=state,
+                city=city,
+                organization=organization
+            )
 
-        print(new_donee.format())
+            print(new_donee.format())
 
-        try:
-            new_donee.insert()
-            return jsonify({
-                'success': True,
-                'donor': new_donee.format()
-            }), 200
-        except Exception:
-            abort(422)
+            try:
+                new_donee.insert()
+                return jsonify({
+                    'success': True,
+                    'new_donee': new_donee.format()
+                }), 200
+            except Exception:
+                abort(422)
+        # return error if donor does not have the permission to edit item(s)
+        raise AuthError({
+            "code": "Unauthorized",
+            "description": "You don't have access to this resource"
+        }, 403)
 
 
 # ----------------------------------------------------------------------------#

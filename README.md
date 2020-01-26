@@ -1,25 +1,285 @@
 # Recyclees
 
+
 ## Introduction
 An app with routes which performs CRUD operations on a Heroku PSQL database.
+
 
 ## Getting started
 - Base URL: https://recyclees.herokuapp.com/
 - Authentication: ...
 
+
 ## API Endpoints
 
-### POST '/api/donors'
-Returns the posted donor and a message
+### Public
 
-#### Sample curl
+#### GET '/api/public/items'
+Returns at max ten items posted for donation which have not been claimed yet and a message. No authentication required.
+
+##### Sample curl
 
 ```shell
-curl -H "Content-Type: application/json" -X POST \
--d '{"user_name":"peter_smith", "first_name": "Peter", "last_name": "Smith", "state": "New Jersey", "city": "Jersey City"}' \
---header 'authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UZEJPVFV3TlVKRlJqZEdPRFpDUlRBNU56VTBPRE01TlRsQ05EQkdNRVUxUVVORU1rUTJOdyJ9.eyJpc3MiOiJodHRwczovL3JlY3ljbGVlcy5hdXRoMC5jb20vIiwic3ViIjoiWlI0U0RjV0Z5YzdEMm1DMWc1TDRzdHlGY08zZmdJSWZAY2xpZW50cyIsImF1ZCI6InJlY3ljbGVlcyIsImlhdCI6MTU3OTM4MjcwNiwiZXhwIjoxNTgxMTEwNzA2LCJhenAiOiJaUjRTRGNXRnljN0QybUMxZzVMNHN0eUZjTzNmZ0lJZiIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyIsInBlcm1pc3Npb25zIjpbXX0.PBstHG8MuXhiopPP-HsQpoUkBaqopaAWy_gItwzqitbQvpPEUxK7cLOrjA0Age2WyJPx2jJs6giVb8cMnQipf0MZ0eFnixKV9QxFq3HhGOUyzlIymwWhg4H7VGBeYzENLiyDjDR2WJV2JKZoAUdOyws2tKpySg1juN6cqdUnYgGcxcDhS_IsR3AjXs17MoWUYYJEWKZDEBMPh05f9TcoKTMbfudxHmVhfhGcnAw3vU4qHYzTFl9YiQHHOR31IBsr0-H5E1CDQ98qx-3kbKrXWctGvRnLxTaidNrObyYmck-rmSRt6obM2673Ysbmo9VEZXajlGAw1VBvCP7HpoS5pQ' \
-https://recyclees.herokuapp.com/api/donors
+curl --request GET \
+--url https://recyclees.herokuapp.com/api/public/items
+```
 
+Result:
+
+```json
+{
+    "items":[],
+    "message":"All items are claimed, sorry. Come back at a later time for better luck!",
+    "success":true
+}
+```
+
+
+### Donors API routes
+
+#### GET '/api/donors/<USER_ID>/items
+Returns a list of items a donor with `USER_ID` has added to the database.  This endpoint needs authentication and the `get:items` permission.
+
+##### Sample curl
+
+```shell
+curl --request GET \
+--url https://recyclees.herokuapp.com/api/donors/1/items \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>'
+```
+
+Result:
+
+```json
+{
+    "items": [
+        {
+            "brand":"Apple",
+            "category":"Laptops",
+            "condition":"Used",
+            "delivery":true,
+            "description":"Will ship in original packaging.",
+            "donee":null,
+            "donor":1,
+            "id":1,
+            "item_name":"MacBook Pro"
+        },
+        {
+            "brand":"Apple",
+            "category":"Mobile Phones",
+            "condition":"Used",
+            "delivery":true,
+            "description":"Cracked screen, but still functional.",
+            "donee":null,
+            "donor":1,
+            "id":2,
+            "item_name":"iPhone 4"
+        }
+    ],
+    "success":true}
+```
+
+
+#### POST '/api/donors/<USER_ID>/items
+Adds an item to the database and associates it to the donor.  This endpoint needs authentication and the `create:items` permission.  Returns a message and the added item upon success.
+
+##### Sample curl
+
+```shell
+curl -X POST \
+--data '{"item_name":"MacBook Pro" ,"brand":"Apple" ,"category":"Laptops" ,"condition":"Used" ,"description":"Will ship in original packaging." ,"delivery":"True"}' \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>' \
+--url https://recyclees.herokuapp.com/api/donors/1/items 
+```
+
+Result:
+
+```json
+{
+    "items":
+    {
+        "brand":"Apple",
+        "category":"Laptops",
+        "condition":"Used",
+        "delivery":true,
+        "description":"Will ship in original packaging."
+        ,"donee":null,
+        "donor":1,
+        "id":1,
+        "item_name":"MacBook Pro"
+        },
+    "success":true
+}
+```
+
+
+#### DELETE '/api/donors/<USER_ID>/items/<ITEM_ID>
+Deletes an item from the database which has been added by donor. This endpoint needs authentication and the `delete:items` permission.  Returns message and the deleted item upon success.
+
+##### Sample curl
+
+```shell
+curl -X DELETE \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>' \
+--url https://recyclees.herokuapp.com/api/donors/1/items/3 
+```
+
+Result:
+
+```json
+{
+    "deleted":
+    {
+        "brand":"Apple",
+        "category":"Mobile Phones",
+        "condition":"Used",
+        "delivery":true,
+        "description":"Cracked screen, but still functional.",
+        "donee":null,
+        "donor":1,
+        "id":3,
+        "item_name":"iPhone 4"
+    },
+    "success":true
+}
+```
+
+
+#### PATCH '/api/donors/<USER_ID>/items/<ITEM_ID>
+Update an item in the database which has been added by donor. This endpoint needs authentication and the `update:items` permission.  Returns message and the updated item upon success.
+
+##### Sample curl
+
+```shell
+curl --request PATCH \
+-H "Content-Type: application/json" \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>' \
+--data '{"brand":"Apple","category":"Mobile Phones","condition":"Used","delivery":"True","description":"Cracked screen, but still functional. Will ship with new charger!","item_name":"iPhone 4s"}' \
+--url https://recyclees.herokuapp.com/api/donors/1/items/2
+```
+
+Result:
+
+```json
+{
+    "updated_item": {
+        "brand":"Apple",
+        "category":"Mobile Phones",
+        "condition":"Used",
+        "delivery":true,
+        "description":"Cracked screen, but still functional. Will ship with new charger!",
+        "donee":null,
+        "donor":1,
+        "id":2,
+        "item_name":"iPhone 4s"
+    },
+    "success":true
+}
+```
+
+
+### Donee API routes
+
+#### GET '/api/donees/<USER_ID>/items
+Returns a list of items a donee with `USER_ID` has claimed from the database.  This endpoint needs authentication and the `get:items` permission.
+
+##### Sample curl
+
+```shell
+curl --request GET \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>' \
+--url http://127.0.0.1:5000/api/donors/1/items
+```
+
+Result:
+
+```json
+{
+  "items": [
+    {
+      "brand": "Apple",
+      "category": "Laptops",
+      "condition": "Used",
+      "delivery": true,
+      "description": "Will ship in original packaging.",
+      "donee": null,
+      "donor": 1,
+      "id": 1,
+      "item_name": "MacBook Pro"
+    },
+    {
+      "brand": "Apple",
+      "category": "Mobile Phones",
+      "condition": "Used",
+      "delivery": true,
+      "description": "Cracked screen, but still functional. Will ship with new charger!",
+      "donee": null,
+      "donor": 1,
+      "id": 2,
+      "item_name": "iPhone 4s"
+    }
+  ],
+  "success": true
+}
+```
+
+#### GET '/api/donees/<USER_ID>/items/<ITEM_ID>
+Returns the item claimed from the database. This endpoint needs authentication and the `update:items` permission.
+
+##### Sample curl
+
+```shell
+curl --request GET \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>' \
+--url http://127.0.0.1:5000/api/donors/1/items
+```
+
+Result:
+
+```json
+{
+  "items": [
+    {
+      "brand": "Apple",
+      "category": "Laptops",
+      "condition": "Used",
+      "delivery": true,
+      "description": "Will ship in original packaging.",
+      "donee": null,
+      "donor": 1,
+      "id": 1,
+      "item_name": "MacBook Pro"
+    },
+    {
+      "brand": "Apple",
+      "category": "Mobile Phones",
+      "condition": "Used",
+      "delivery": true,
+      "description": "Cracked screen, but still functional. Will ship with new charger!",
+      "donee": null,
+      "donor": 1,
+      "id": 2,
+      "item_name": "iPhone 4s"
+    }
+  ],
+  "success": true
+}
+```
+
+
+### Admin Routes (User Creation)
+
+#### POST '/api/donors'
+Returns the posted donor and a message.
+
+##### Sample curl
+
+```shell
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{"user_name":"peter_smith", "first_name": "Peter", "last_name": "Smith", "state": "New Jersey", "city": "Jersey City"}' \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>' \
+--url https://recyclees.herokuapp.com/api/donors
 ```
 
 Result:
@@ -30,7 +290,7 @@ Result:
     {
         "city":"Jersey City",
         "first_name":"Peter",
-        "id":1,
+        "id":2,
         "items":[],
         "last_name":"Smith",
         "state":"New Jersey",
@@ -41,15 +301,16 @@ Result:
 
 ```
 
-### POST '/api/donees'
-Returns the posted donee and a message
+#### POST '/api/donees'
+Returns the posted donee and a message.
 
-#### Sample curl
+##### Sample curl
 
 ```shell
-curl -H "Content-Type: application/json" -X POST \
+curl --request POST \
+-H "Content-Type: application/json" \
 -d '{"user_name":"HSCT", "first_name": "Melissa", "last_name": "Grant", "state": "Connecticut", "city": "Hartford", "organization": "Homeless Shelter in Hartford, CT"}' \
---header 'authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UZEJPVFV3TlVKRlJqZEdPRFpDUlRBNU56VTBPRE01TlRsQ05EQkdNRVUxUVVORU1rUTJOdyJ9.eyJpc3MiOiJodHRwczovL3JlY3ljbGVlcy5hdXRoMC5jb20vIiwic3ViIjoiWlI0U0RjV0Z5YzdEMm1DMWc1TDRzdHlGY08zZmdJSWZAY2xpZW50cyIsImF1ZCI6InJlY3ljbGVlcyIsImlhdCI6MTU3OTM4MjcwNiwiZXhwIjoxNTgxMTEwNzA2LCJhenAiOiJaUjRTRGNXRnljN0QybUMxZzVMNHN0eUZjTzNmZ0lJZiIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyIsInBlcm1pc3Npb25zIjpbXX0.PBstHG8MuXhiopPP-HsQpoUkBaqopaAWy_gItwzqitbQvpPEUxK7cLOrjA0Age2WyJPx2jJs6giVb8cMnQipf0MZ0eFnixKV9QxFq3HhGOUyzlIymwWhg4H7VGBeYzENLiyDjDR2WJV2JKZoAUdOyws2tKpySg1juN6cqdUnYgGcxcDhS_IsR3AjXs17MoWUYYJEWKZDEBMPh05f9TcoKTMbfudxHmVhfhGcnAw3vU4qHYzTFl9YiQHHOR31IBsr0-H5E1CDQ98qx-3kbKrXWctGvRnLxTaidNrObyYmck-rmSRt6obM2673Ysbmo9VEZXajlGAw1VBvCP7HpoS5pQ' \
+--header 'authorization: Bearer <INSERT BEARER TOKEN>' \
 https://recyclees.herokuapp.com/api/donees
 ```
 
