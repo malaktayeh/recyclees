@@ -61,7 +61,8 @@ def create_app(test_config=None):
         # check if user has the right to access items
         if requires_scope("get:items"):
             try:
-                items = Items.query.filter(Items.donor == user_id).join(Donors).all()
+                items = Items.query.filter(Items.donor == user_id)
+                .join(Donors).all()
                 result = [item.format() for item in items]
 
                 if items is None:
@@ -119,10 +120,7 @@ def create_app(test_config=None):
                     'items': new_item.format()
                 }), 200
             except Exception:
-                db.session.rollback()
                 abort(422)
-            finally:
-                db.session.close()
 
         # return error if donor does not have the permission
         # to get add new item(s)
@@ -139,7 +137,8 @@ def create_app(test_config=None):
     def delete_item_from_donor_item_list(user_id, item_id):
         # check if user has the right to delete items
         if requires_scope("delete:items"):
-            item = Items.query.filter(Items.id == item_id).join(Donors).filter(Donors.id == user_id).first()
+            item = Items.query.filter(Items.id == item_id).join(Donors)
+            .filter(Donors.id == user_id).first()
 
             if item is None:
                 abort(404)
@@ -170,7 +169,8 @@ def create_app(test_config=None):
             # get json data from user
             body = request.get_json()
 
-            item = Items.query.filter(Items.id == item_id).join(Donors).filter(Donors.id == user_id).first()
+            item = Items.query.filter(Items.id == item_id).join(Donors)
+            .filter(Donors.id == user_id).first()
 
             if (body is {} is None):
                 abort(400)
@@ -224,7 +224,8 @@ def create_app(test_config=None):
         # check if user has the right to get items
         if requires_scope("get:items"):
             try:
-                items = Items.query.filter(Items.donee == user_id).join(Donees).all()
+                items = Items.query.filter(Items.donee == user_id)
+                .join(Donees).all()
 
                 result = [item.format() for item in items]
 
@@ -250,7 +251,8 @@ def create_app(test_config=None):
         # check if user has the right to update items
         if requires_scope("update:items"):
             try:
-                item = Items.query.filter(Items.id == item_id).join(Donors).first()
+                item = Items.query.filter(Items.id == item_id)
+                .join(Donors).first()
 
                 if item is None:
                     abort(400)
