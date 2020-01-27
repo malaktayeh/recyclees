@@ -355,7 +355,7 @@ Result:
 ```
 
 
-## TODO
+## TODOS
 
 Things that I want to add in the near future:
 1. The frontend!
