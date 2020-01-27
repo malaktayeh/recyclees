@@ -23,7 +23,7 @@ def create_app(test_config=None):
 # ----------------------------------------------------------------------------#
 
     # This doesn't need authentication - returns 10 items
-    @app.route("/api/public/items", methods=["GET"])
+    @app.route("/", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     def get_items():
         try:
@@ -43,7 +43,7 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'message': 'These items are up for grabs! Sign in to claim.',
-                'items': items
+                'items': items.format()
             }), 200
         except Exception:
             abort(404)
@@ -63,10 +63,11 @@ def create_app(test_config=None):
             try:
                 items = Items.query.filter(Items.donor == user_id) \
                         .join(Donors).all()
-                result = [item.format() for item in items]
 
-                if items is None:
+                if items == []:
                     abort(400)
+
+                result = [item.format() for item in items]
 
                 return jsonify({
                     'success': True,
@@ -172,7 +173,7 @@ def create_app(test_config=None):
             item = Items.query.filter(Items.id == item_id).join(Donors) \
                 .filter(Donors.id == user_id).first()
 
-            if (body is {} is None):
+            if (body is {}):
                 abort(400)
 
             item_name = body['item_name']
@@ -260,7 +261,7 @@ def create_app(test_config=None):
 
                 return jsonify({
                     "success": True,
-                    "items": item.format()
+                    "item_claimed": item.format()
                 }), 200
             except Exception:
                 abort(404)
@@ -283,7 +284,7 @@ def create_app(test_config=None):
     def add_new_donor_to_database():
         if requires_scope("create:users"):
             # get json data from user
-            body = request.get_json(silent=False)
+            body = request.get_json()
 
             if body is None:
                 abort(400)
@@ -294,21 +295,23 @@ def create_app(test_config=None):
             state = body['state']
             city = body['city']
 
-            # create new Donor instance
-            new_donor = Donors(
-                user_name=user_name,
-                first_name=first_name,
-                last_name=last_name,
-                state=state,
-                city=city
-            )
-
             try:
+                # create new Donor instance
+                new_donor = Donors(
+                    user_name=user_name,
+                    first_name=first_name,
+                    last_name=last_name,
+                    state=state,
+                    city=city
+                )
+
                 new_donor.insert()
+
                 return jsonify({
                     'success': True,
                     'new_donor': new_donor.format()
                 }), 200
+
             except Exception:
                 abort(422)
 
@@ -325,7 +328,7 @@ def create_app(test_config=None):
     def add_new_donee_to_database():
         if requires_scope("create:users"):
             # get json data from user
-            body = request.get_json(silent=False)
+            body = request.get_json()
 
             if body is None:
                 abort(400)
@@ -337,26 +340,27 @@ def create_app(test_config=None):
             city = body['city']
             organization = body['organization']
 
-            # create new Donee instance
-            new_donee = Donees(
-                user_name=user_name,
-                first_name=first_name,
-                last_name=last_name,
-                state=state,
-                city=city,
-                organization=organization
-            )
-
-            print(new_donee.format())
-
             try:
+                # create new Donee instance
+                new_donee = Donees(
+                    user_name=user_name,
+                    first_name=first_name,
+                    last_name=last_name,
+                    state=state,
+                    city=city,
+                    organization=organization
+                )
+
                 new_donee.insert()
+
                 return jsonify({
                     'success': True,
                     'new_donee': new_donee.format()
                 }), 200
+
             except Exception:
                 abort(422)
+
         # return error if donor does not have the permission to edit item(s)
         raise AuthError({
             "code": "Unauthorized",
@@ -367,6 +371,14 @@ def create_app(test_config=None):
 # ----------------------------------------------------------------------------#
 # Error handler routes
 # ----------------------------------------------------------------------------#
+
+    @app.errorhandler(400)
+    def not_authorized(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "Bad request"
+        }), 400
 
     @app.errorhandler(401)
     def not_authorized(error):
