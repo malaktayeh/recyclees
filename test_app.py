@@ -46,7 +46,7 @@ class RecycleesTestCase(unittest.TestCase):
     # /////////////////////////////////////////////////////////////////
 
     def test_get_ten_items_from_public_route(self):
-        res = self.client().get('/')
+        res = self.client().get('/api/public/items')
         data = json.loads(res.data)
 
         print(data)

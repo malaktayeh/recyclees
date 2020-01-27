@@ -45,7 +45,7 @@ Donees have the permission to do the following: `get:items`, and `update:items`.
 
 ### Public
 
-#### GET  '/'
+#### GET  '/api/public/items'
 Returns at max ten items posted for donation which have not been claimed yet and a message. No authentication required.
 
 ##### Sample curl
