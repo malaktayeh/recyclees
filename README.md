@@ -45,7 +45,7 @@ Donees have the permission to do the following: `get:items`, and `update:items`.
 
 ### Public
 
-#### GET  '/api/public/items'
+#### GET  '/api/public'
 Returns at max ten items posted for donation which have not been claimed yet and a message. No authentication required.
 
 ##### Sample curl
@@ -135,8 +135,8 @@ Result:
         "category":"Laptops",
         "condition":"Used",
         "delivery":true,
-        "description":"Will ship in original packaging."
-        ,"donee":null,
+        "description":"Will ship in original packaging.",
+        "donee":null,
         "donor":1,
         "id":1,
         "item_name":"MacBook Pro"

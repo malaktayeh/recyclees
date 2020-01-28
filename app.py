@@ -38,13 +38,13 @@ def create_app(test_config=None):
                                  a later time for better luck!',
                     'items': items
                 }), 200
-
+            else:
             # return max of 10 items which are not claimed yet
-            return jsonify({
-                'success': True,
-                'message': 'These items are up for grabs! Sign in to claim.',
-                'items': items.format()
-            }), 200
+                return jsonify({
+                    'success': True,
+                    'message': 'These items are up for grabs! Sign in to claim.',
+                    'items': items
+                }), 200
         except Exception:
             abort(404)
 
@@ -80,7 +80,7 @@ def create_app(test_config=None):
         raise AuthError({
             "code": "Unauthorized",
             "description": "You don't have access to this resource"
-        }, 403)
+        }, 401)
 
     # Route for signed in donor to add a new item to database
     @app.route("/api/donors/<int:user_id>/items", methods=["POST"])
@@ -122,13 +122,6 @@ def create_app(test_config=None):
                 }), 200
             except Exception:
                 abort(422)
-
-        # return error if donor does not have the permission
-        # to get add new item(s)
-        raise AuthError({
-            "code": "Unauthorized",
-            "description": "You don't have access to this resource"
-        }, 403)
 
     # Route for signed in donor to delete an item from database
     @app.route("/api/donors/<int:user_id>/items/<int:item_id>",
