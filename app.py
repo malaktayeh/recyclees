@@ -399,7 +399,7 @@ def create_app(test_config=None):
         }), 405
 
     @app.errorhandler(422)
-    def method_not_allowed(error):
+    def unprocessable(error):
         return jsonify({
             'success': False,
             'error': 422,
