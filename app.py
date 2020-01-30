@@ -94,28 +94,30 @@ def create_app(test_config=None):
 
             if body is None:
                 abort(400)
-
+            
             item_name = body['item_name']
             brand = body['brand']
             category = body['category']
-            condition = body['condition']
+            condition = body.get('condition', '')
             description = body['description']
             delivery = body['delivery']
-
-            # create new item instance
-            new_item = Items()
-
-            # insert data into new instance
-            new_item.item_name = item_name
-            new_item.brand = brand
-            new_item.category = category
-            new_item.condition = condition
-            new_item.description = description
-            new_item.delivery = delivery
-            new_item.donor = user_id
+            donor = user_id
 
             try:
+                # create new item instance
+                new_item = Items(
+                    item_name=item_name,
+                    brand=brand,
+                    category=category,
+                    condition=condition,
+                    description=description,
+                    delivery=delivery,
+                    donor=donor
+                )
+                print(new_item)
+
                 new_item.insert()
+
                 return jsonify({
                     'success': True,
                     'item': new_item.format()
@@ -146,12 +148,6 @@ def create_app(test_config=None):
             except Exception:
                 abort(422)
 
-        # return error if donor does not have the permission to delete item(s)
-        raise AuthError({
-            "code": "Unauthorized",
-            "description": "You don't have access to this resource"
-        }, 403)
-
     # Route for signed in donor to update an item
     @app.route("/api/donors/<int:user_id>/items/<int:item_id>",
                methods=["PATCH"])
@@ -168,24 +164,20 @@ def create_app(test_config=None):
 
             if (body is {}):
                 abort(400)
-
-            item_name = body['item_name']
-            brand = body['brand']
-            category = body['category']
-            condition = body['condition']
-            description = body['description']
-            delivery = body['delivery']
-
+            
             try:
                 # replace old instance data with new from PATCH request
-                item.item_name = item_name
-                item.brand = brand
-                item.category = category
-                item.condition = condition
-                item.description = description
-                item.delivery = delivery
+                item.item_name = body['item_name']
+                item.brand = body['brand']
+                item.category = body['category']
+                item.condition = body['condition']
+                item.description = body['description']
+                item.delivery = body['delivery']
                 item.donor = user_id
+            except Exception:
+                abort(400)
 
+            try:
                 # update instance in database
                 item.update()
 
@@ -288,6 +280,11 @@ def create_app(test_config=None):
             state = body['state']
             city = body['city']
 
+            
+            # if user_name or not first_name or not last_name or not state or not city:
+            #     print('fail!')
+            #     abort(422)
+
             try:
                 # create new Donor instance
                 new_donor = Donors(
@@ -299,20 +296,16 @@ def create_app(test_config=None):
                 )
 
                 new_donor.insert()
+                print('in try block!')
 
                 return jsonify({
                     'success': True,
                     'new_donor': new_donor.format()
+                    # 'new_donor_id': Donors.query.filter(Items.user_name == user_name).first()
                 }), 200
-
+                
             except Exception:
                 abort(422)
-
-        # return error if donor does not have the permission to edit item(s)
-        raise AuthError({
-            "code": "Unauthorized",
-            "description": "You don't have access to this resource"
-        }, 403)
 
     # Route for adding a donee to database
     @app.route("/api/donees", methods=["POST"])
