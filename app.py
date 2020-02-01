@@ -141,7 +141,8 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'deleted': item.format()
+                    'deleted_item': item.format(),
+                    'deleted_item_id': item.id
                 }), 200
             except Exception:
                 abort(422)

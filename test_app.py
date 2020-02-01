@@ -133,9 +133,7 @@ class RecycleesTestCase(unittest.TestCase):
     def test_donor_adds_new_item(self):
         res = self.client().post('/api/donors/1/items', headers=self.headers, json=self.new_item2)
         data = json.loads(res.data)
-        # print(data['new_item_id'])
         new_item_with_id_exists = Items.query.filter(Items.id == data['new_item_id']).join(Donors).filter(Donors.id == 1).first()
-        print(new_item_with_id_exists)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -156,21 +154,23 @@ class RecycleesTestCase(unittest.TestCase):
         self.assertEqual(data['message'], "Unprocessable")
 
     # DELETE ROUTE
-    # def test_donor_tries_to_deletes_item(self):
-    #     res = self.client().delete('api/donors/2/items/1', headers=self.headers)
-    #     data = json.loads(res.data)
+    def test_donor_tries_to_delete_item(self):
+        res = self.client().delete('api/donors/1/items/1', headers=self.headers)
+        data = json.loads(res.data)
+        does_item_exist = Items.query.filter(Items.id == data['deleted_item_id']).join(Donors).filter(Donors.id == 1).first()
 
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertEqual(data['item'][1]['id'][1], 1)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted_item']['id'], 1)
+        self.assertFalse(does_item_exist)
 
-    # def test_404_donor_tries_to_delete_nonexistent_item(self):
-    #     res = self.client().delete('api/donors/2/items/10000', headers=self.headers)
-    #     data = json.loads(res.data)
+    def test_404_donor_tries_to_delete_nonexistent_item(self):
+        res = self.client().delete('api/donors/2/items/10000', headers=self.headers)
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 404)
-    #     self.assertEqual(data['success'], False)
-    #     self.assertEqual(data['message'], 'Not found')
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Not found')
 
     # # PATCH ROUTE
     # def test_donor_updates_current_item(self):
