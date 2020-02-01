@@ -1,9 +1,9 @@
 # Recyclees
-This API was written for the CAPSTONE Udacity Project for the Full-Stack nanodegree.  I got the itea from the first hackathon I attended.  Unfortuanely, we didn't have enough team members and had to split to a different team.  Shoutout to the guy who came up with the idea (wish I could credit you for it)!
+This API was written for the CAPSTONE Udacity Project for the Full-Stack nanodegree.  I got the idea from the first hackathon I attended.  Regrettably, we didn't have enough team members and had to split to a different team.  Shoutout to the guy who came up with the idea (wish I could credit you for it)!
 
 
 ## Introduction
-An app with routes which performs CRUD operations on a Heroku PSQL database.
+An app with routes that performs CRUD operations on a Heroku PSQL database. Used Auth0 for authentication.
 
 
 ## Getting started
@@ -15,16 +15,17 @@ Base URL: https://recyclees.herokuapp.com/
 - Run locally
 Make sure that you have the key dependencies (Python 3, pip, Flask, SQLAlchemy) installed!
 
-1. Fork or copy this repository.
+1. Fork or copy this repository
 2. Create a virtual environment (not required, but recommended)
 3. Create a Postgres Database
 4. Open your terminal and run `pip install -r requirements.txt`
 5. In your terminal export the location of your local database: `export DATABASE_URL:postgresql://postgres@localhost:5432/<INSERT DATABASE NAME>`
-6. To run the server, execute `export FLASK_APP=api.py` following `flask run --reload`
+6. In your terminal, export TOKEN (since there is no frontend yet, feel free to ask me for an Auth0 bearer token) 
+7. To run the server, execute `export FLASK_APP=api.py` following `flask run --reload`
 
 
-## Roles / API Permissions
-The API has three different roles:
+## Roles / API Permissions / Authentication
+The API has three different roles which have been set up with the help of [Auth0](https://auth0.com/ "Auth0's Homepage"):
 1. Admin
 2. Donor
 3. Donees
@@ -59,9 +60,32 @@ Result:
 
 ```json
 {
-    "items":[],
-    "message":"All items are claimed, sorry. Come back at a later time for better luck!",
-    "success":true
+  "items": [
+    {
+      "brand": "Apple",
+      "category": "Mobile Phones",
+      "condition": "Used",
+      "delivery": "True",
+      "description": "Cracked screen, but still functional. Will ship with new charger!",
+      "donee": null,
+      "donor": 1,
+      "id": 106,
+      "item_name": "iPhone 4s"
+    },
+    {
+      "brand": "Apple",
+      "category": "Laptops",
+      "condition": "Used",
+      "delivery": "True",
+      "description": "Will ship in original packaging.",
+      "donee": null,
+      "donor": 1,
+      "id": 107,
+      "item_name": "MacBook Pro"
+    }
+  ],
+  "message": "These items are up for grabs! Sign in to claim.",
+  "success": true
 }
 ```
 
@@ -85,29 +109,29 @@ Result:
 {
     "items": [
         {
-            "brand":"Apple",
-            "category":"Laptops",
-            "condition":"Used",
-            "delivery":true,
-            "description":"Will ship in original packaging.",
-            "donee":null,
-            "donor":1,
-            "id":1,
-            "item_name":"MacBook Pro"
+            "brand": "Apple",
+            "category": "Laptops",
+            "condition": "Used",
+            "delivery": "True",
+            "description": "Will ship in original packaging.",
+            "donee": null,
+            "donor": 1,
+            "id": 1,
+            "item_name": "MacBook Pro"
         },
         {
-            "brand":"Apple",
-            "category":"Mobile Phones",
-            "condition":"Used",
-            "delivery":true,
-            "description":"Cracked screen, but still functional.",
-            "donee":null,
-            "donor":1,
-            "id":2,
-            "item_name":"iPhone 4"
+            "brand": "Apple",
+            "category": "Mobile Phones",
+            "condition": "Used",
+            "delivery": "True",
+            "description": "Cracked screen, but still functional.",
+            "donee": null,
+            "donor": 1,
+            "id": 2,
+            "item_name": "iPhone 4"
         }
     ],
-    "success":true
+    "success": true
 }
 ```
 
@@ -129,19 +153,18 @@ Result:
 
 ```json
 {
-    "items":
-    {
-        "brand":"Apple",
-        "category":"Laptops",
-        "condition":"Used",
-        "delivery":true,
-        "description":"Will ship in original packaging.",
-        "donee":null,
-        "donor":1,
-        "id":1,
-        "item_name":"MacBook Pro"
+    "new_item": {
+        "brand": "Apple",
+        "category":" Laptops",
+        "condition": "Used",
+        "delivery": "True",
+        "description": "Will ship in original packaging.",
+        "donee": null,
+        "donor": 1,
+        "id": 1,
+        "item_name": "MacBook Pro"
         },
-    "success":true
+    "success": true
 }
 ```
 
@@ -162,19 +185,18 @@ Result:
 
 ```json
 {
-    "deleted":
-    {
-        "brand":"Apple",
-        "category":"Mobile Phones",
-        "condition":"Used",
-        "delivery":true,
-        "description":"Cracked screen, but still functional.",
-        "donee":null,
-        "donor":1,
-        "id":3,
-        "item_name":"iPhone 4"
+    "deleted_item": {
+        "brand": "Apple",
+        "category": "Mobile Phones",
+        "condition": "Used",
+        "delivery": "True",
+        "description": "Cracked screen, but still functional.",
+        "donee": null,
+        "donor": 1,
+        "id": 3,
+        "item_name": "iPhone 4"
     },
-    "success":true
+    "success": true
 }
 ```
 
@@ -197,17 +219,17 @@ Result:
 ```json
 {
     "updated_item": {
-        "brand":"Apple",
-        "category":"Mobile Phones",
-        "condition":"Used",
-        "delivery":true,
-        "description":"Cracked screen, but still functional. Will ship with new charger!",
-        "donee":null,
-        "donor":1,
-        "id":2,
-        "item_name":"iPhone 4s"
+        "brand": "Apple",
+        "category": "Mobile Phones",
+        "condition": "Used",
+        "delivery": "True",
+        "description": "Cracked screen, but still functional. Will ship with new charger!",
+        "donee": null,
+        "donor": 1,
+        "id": 2,
+        "item_name": "iPhone 4s"
     },
-    "success":true
+    "success": true
 }
 ```
 
@@ -222,7 +244,7 @@ Returns a list of items a donee with `USER_ID` has claimed from the database. Th
 ```shell
 curl --request GET \
 --header 'authorization: Bearer <INSERT BEARER TOKEN>' \
---url http://127.0.0.1:5000/api/donors/1/items
+--url https://recyclees.herokuapp.com/api/donees/1/items
 ```
 
 Result:
@@ -245,7 +267,7 @@ Result:
       "brand": "Apple",
       "category": "Mobile Phones",
       "condition": "Used",
-      "delivery": true,
+      "delivery": "True",
       "description": "Cracked screen, but still functional. Will ship with new charger!",
       "donee": null,
       "donor": 1,
@@ -265,19 +287,18 @@ Returns the item claimed from the database. This endpoint needs authentication a
 ```shell
 curl --request PATCH \
 --header 'authorization: Bearer <INSERT BEARER TOKEN>' \
---url http://127.0.0.1:5000/api/donees/1/items/2
+--url https://recyclees.herokuapp.com/api/donees/1/items/2
 ```
 
 Result:
 
 ```json
 {
-  "item_claimed": 
-  {
+  "item_claimed": {
       "brand": "Apple",
       "category": "Mobile Phones",
       "condition": "Used",
-      "delivery": true,
+      "delivery": "True",
       "description": "Cracked screen, but still functional. Will ship with new charger!",
       "donee": null,
       "donor": 1,
@@ -308,17 +329,16 @@ Result:
 
 ```json
 {
-    "donor":
-    {
-        "city":"Jersey City",
-        "first_name":"Peter",
-        "id":2,
-        "items":[],
-        "last_name":"Smith",
-        "state":"New Jersey",
-        "user_name":"peter_smith"
+    "new_donor": {
+        "city": "Jersey City",
+        "first_name": "Peter",
+        "id": 2,
+        "items": [],
+        "last_name": "Smith",
+        "state": "New Jersey",
+        "user_name": "peter_smith"
     },
-    "success":true
+    "success": true
 }
 
 ```
@@ -340,23 +360,23 @@ Result:
 
 ```json
 {
-    "donor":
-    {
-        "city":"Hartford",
-        "first_name":"Melissa",
-        "id":1,"items":[],
-        "last_name":"Grant",
-        "organization":"Homeless Shelter in Hartford, CT",
-        "state":"Connecticut",
-        "user_name":"HSCT"
-    },
-    "success":true
+  "new_donee": {
+    "city": "Hartford",
+    "first_name": "Melissa",
+    "id": 68,
+    "items": [],
+    "last_name": "Grant",
+    "organization": "Homeless Shelter in Hartford, CT",
+    "state": "Connecticut",
+    "user_name": "HSCT"
+  },
+  "success": true
 }
 ```
 
 
 ## TODOS
 
-Things that I want to add in the near future:
+Things that I want to add soon:
 1. The frontend!
 2. Verifications for entering data into the database (State name, boolean types, etc...)

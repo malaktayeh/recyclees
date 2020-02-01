@@ -90,7 +90,7 @@ class RecycleesTestCase(unittest.TestCase):
     # /////////////////////////////////////////////////////////////////
 
     def test_get_ten_items_from_public_route(self):
-        res = self.client().get('/api/public')
+        res = self.client().get('/api/public/items')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -98,7 +98,7 @@ class RecycleesTestCase(unittest.TestCase):
         self.assertTrue(len(data['items']) > -1)
 
     def test_404_fail_to_get_item_list(self):
-        res = self.client().get('/api/public/items')
+        res = self.client().get('/api/public/item')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
@@ -116,7 +116,7 @@ class RecycleesTestCase(unittest.TestCase):
                                  json=self.new_donor)
         data = json.loads(res.data)
         does_donor_with_id_exist = Donors.query.filter(
-                                   Donors.id == data['new_donor_id']).first()
+                                   Donors.id == data['new_donee']['id']).first()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -146,7 +146,7 @@ class RecycleesTestCase(unittest.TestCase):
                                  json=self.new_donee)
         data = json.loads(res.data)
         does_donee_with_id_exist = Donees.query.filter(
-                                   Donees.id == data['new_donee_id']).first()
+                                   Donees.id == data['new_donee']['id']).first()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -203,7 +203,7 @@ class RecycleesTestCase(unittest.TestCase):
                                  json=self.new_item2)
         data = json.loads(res.data)
         new_item_with_id_exists = Items.query.filter(
-                                  Items.id == data['new_item_id']).join(
+                                  Items.id == data['new_item']['id']).join(
                                   Donors).filter(Donors.id == 1).first()
 
         self.assertEqual(res.status_code, 200)

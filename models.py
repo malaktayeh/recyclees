@@ -3,8 +3,7 @@ from sqlalchemy import Column, String, Integer, Boolean, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-# database_path = os.environ['DATABASE_URL']
-database_path = 'postgresql://postgres@localhost:5432/recyclees_test'
+database_path = os.environ['DATABASE_URL']
 db = SQLAlchemy()
 
 '''
@@ -154,7 +153,7 @@ class Items(db.Model):
     def __repr__(self):
         return f'< Item id: {self.id} {self.item_name} {self.brand} \
                 {self.category} {self.condition} {self.description} \
-                {self.delivery} {self.donor} {self.donee}>'
+                {self.delivery} {self.donor} {self.donee} >'
 
     def __init__(self, **kwargs):
         super(Items, self).__init__(**kwargs)

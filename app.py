@@ -23,7 +23,7 @@ def create_app(test_config=None):
 # ----------------------------------------------------------------------------#
 
     # This doesn't need authentication - returns 10 items
-    @app.route("/api/public", methods=["GET"])
+    @app.route("/api/public/items", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     def get_items():
         try:
@@ -65,7 +65,7 @@ def create_app(test_config=None):
                 items = Items.query.filter(Items.donor == user_id) \
                         .join(Donors).all()
 
-                if not items:
+                if items == []:
                     raise Exception
 
                 result = [item.format() for item in items]
@@ -119,8 +119,7 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'new_item': new_item.format(),
-                    'new_item_id': new_item.id
+                    'new_item': new_item.format()
                 }), 200
             except Exception:
                 abort(422)
@@ -310,7 +309,6 @@ def create_app(test_config=None):
 
             if (user_name == '' or first_name == '' or last_name == '' or
                     state == '' or city == ''):
-                print('submitted empty data!')
                 abort(422)
 
             # create new Donee instance
@@ -328,8 +326,7 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'new_donee': new_donee.format(),
-                    'new_donee_id': new_donee.id
+                    'new_donee': new_donee.format()
                 }), 200
 
             except Exception:
