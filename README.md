@@ -395,3 +395,7 @@ Result:
 Things that I want to add soon:
 1. The frontend!
 2. Verifications for entering data into the database (State name, boolean types, etc...)
+
+
+## License
+Project is licensed under the terms of [MIT](https://en.wikipedia.org/wiki/MIT_License)
