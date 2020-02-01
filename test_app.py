@@ -116,7 +116,7 @@ class RecycleesTestCase(unittest.TestCase):
                                  json=self.new_donor)
         data = json.loads(res.data)
         does_donor_with_id_exist = Donors.query.filter(
-                                   Donors.id == data['new_donee']['id']).first()
+                                   Donors.id == data['new_donor']['id']).first()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -232,10 +232,10 @@ class RecycleesTestCase(unittest.TestCase):
 
     # DELETE ROUTE
     def test_donor_tries_to_delete_item(self):
-        res = self.client().delete('api/donors/4/items/5',
+        res = self.client().delete('api/donors/4/items/3',
                                    headers=self.headers)
         data = json.loads(res.data)
-        does_item_exist = Items.query.filter(Items.id == 5).join(
+        does_item_exist = Items.query.filter(Items.id == 3).join(
                           Donors).filter(Donors.id == 4).first()
 
         self.assertEqual(res.status_code, 200)

@@ -7,7 +7,7 @@ An app with routes that performs CRUD operations on a Heroku PSQL database. Used
 
 
 ## Getting started
-You had the following two options: 
+You have the following two options: 
 
 #### Use the hosted API
 
