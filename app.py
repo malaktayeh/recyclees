@@ -23,7 +23,7 @@ def create_app(test_config=None):
 # ----------------------------------------------------------------------------#
 
     # This doesn't need authentication - returns 10 items
-    @app.route("/api/public/items", methods=["GET"])
+    @app.route("/", methods=["GET"])
     @cross_origin(headers=["Content-Type", "Authorization"])
     def get_items():
         try:

@@ -25,7 +25,7 @@ Make sure that you have the key dependencies (Python 3, pip, Flask, SQLAlchemy) 
 4. Open your terminal and run `pip install -r requirements.txt`
 5. In `models.py` comment out line 6 and uncomment line 7 with the name of your local database
 6. In your terminal, export TOKEN (since there is no frontend yet, feel free to ask me for an Auth0 bearer token) 
-7. To run the server, execute `export FLASK_APP=api.py` following `flask run --reload`
+7. To run the server, execute `export FLASK_APP=app.py` following `flask run --reload`
 
 
 ## Roles / API Permissions / Authentication
@@ -58,7 +58,7 @@ Returns at max ten items posted for donation which have not been claimed yet and
 
 ```shell
 curl --request GET \
---url https://recyclees.herokuapp.com/api/public/items
+--url https://recyclees.herokuapp.com/
 ```
 
 Result:

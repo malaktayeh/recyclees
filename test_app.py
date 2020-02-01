@@ -90,7 +90,7 @@ class RecycleesTestCase(unittest.TestCase):
     # /////////////////////////////////////////////////////////////////
 
     def test_get_ten_items_from_public_route(self):
-        res = self.client().get('/api/public/items')
+        res = self.client().get('/')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -98,7 +98,7 @@ class RecycleesTestCase(unittest.TestCase):
         self.assertTrue(len(data['items']) > -1)
 
     def test_404_fail_to_get_item_list(self):
-        res = self.client().get('/api/public/item')
+        res = self.client().get('/')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
