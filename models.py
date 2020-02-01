@@ -44,7 +44,7 @@ class Donors(db.Model):
 
     def __repr__(self):
         return f'<Donor {self.id} {self.user_name} {self.first_name} \
-                 {self.last_name} {self.state} {self.city} >'
+                 {self.last_name} {self.state} {self.city} {self.items} >'
 
     def __init__(self, user_name, first_name, last_name, state, city):
         self.user_name = user_name

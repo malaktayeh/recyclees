@@ -114,9 +114,9 @@ def create_app(test_config=None):
                     delivery=delivery,
                     donor=donor
                 )
-                print(new_item)
 
                 new_item.insert()
+                print(new_item)
 
                 return jsonify({
                     'success': True,
@@ -274,16 +274,15 @@ def create_app(test_config=None):
             if body is None:
                 abort(400)
 
-            user_name = body['user_name']
-            first_name = body['first_name']
-            last_name = body['last_name']
-            state = body['state']
-            city = body['city']
+            user_name = body.get('user_name', '') 
+            first_name = body.get('first_name', '')
+            last_name = body.get('last_name', '')
+            state = body.get('state', '')
+            city = body.get('city', '')
 
-            
-            # if user_name or not first_name or not last_name or not state or not city:
-            #     print('fail!')
-            #     abort(422)
+
+            if (user_name == '' or first_name == '' or last_name == '' or state == '' or city == ''):
+                abort(422)
 
             try:
                 # create new Donor instance
@@ -296,12 +295,11 @@ def create_app(test_config=None):
                 )
 
                 new_donor.insert()
-                print('in try block!')
 
                 return jsonify({
                     'success': True,
-                    'new_donor': new_donor.format()
-                    # 'new_donor_id': Donors.query.filter(Items.user_name == user_name).first()
+                    'new_donor': new_donor.format(),
+                    'new_donor_id': new_donor.id
                 }), 200
                 
             except Exception:
@@ -319,12 +317,15 @@ def create_app(test_config=None):
             if body is None:
                 abort(400)
 
-            user_name = body['user_name']
-            first_name = body['first_name']
-            last_name = body['last_name']
-            state = body['state']
-            city = body['city']
-            organization = body['organization']
+            user_name = body.get('user_name', '') 
+            first_name = body.get('first_name', '')
+            last_name = body.get('last_name', '')
+            state = body.get('state', '')
+            city = body.get('city', '')
+            organization = body.get('organization', '')
+
+            if (user_name == '' or first_name == '' or last_name == '' or state == '' or city == ''):
+                abort(422)
 
             try:
                 # create new Donee instance
@@ -341,7 +342,8 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'new_donee': new_donee.format()
+                    'new_donee': new_donee.format(),
+                    'new_donee_id': new_donee.id
                 }), 200
 
             except Exception:
