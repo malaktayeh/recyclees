@@ -117,7 +117,8 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'item': new_item.format()
+                    'new_item': new_item.format(),
+                    'new_item_id': new_item.id
                 }), 200
             except Exception:
                 abort(422)

@@ -130,22 +130,30 @@ class RecycleesTestCase(unittest.TestCase):
         self.assertEqual(data['message'], "Authorization header is expected")
 
     # POST ROUTE
-    # def test_donor_adds_new_item(self):
-    #     res = self.client().post('/api/donors/1/items', headers=self.headers, json=self.new_item2)
-    #     data = json.loads(res.data)
+    def test_donor_adds_new_item(self):
+        res = self.client().post('/api/donors/1/items', headers=self.headers, json=self.new_item2)
+        data = json.loads(res.data)
+        # print(data['new_item_id'])
+        new_item_with_id_exists = Items.query.filter(Items.id == data['new_item_id']).join(Donors).filter(Donors.id == 1).first()
+        print(new_item_with_id_exists)
 
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertEqual(data['item']['donor'], 1)
-    #     self.assertEqual(data['item']['item_name'], self.new_item['item_name'])
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['new_item']['donor'], 1)
+        self.assertEqual(data['new_item']['item_name'], self.new_item2['item_name'])
+        self.assertEqual(data['new_item']['brand'], self.new_item2['brand'])
+        self.assertEqual(data['new_item']['category'], self.new_item2['category'])
+        self.assertEqual(data['new_item']['condition'], self.new_item2['condition'])
+        self.assertEqual(data['new_item']['delivery'], self.new_item2['delivery'])
+        self.assertTrue(new_item_with_id_exists)
 
-    # def test_400_donor_adding_incomplete_item(self):
-    #     res = self.client().post('api/donors/1/items', headers=self.headers, json=self.incomplete_item)
-    #     data = json.loads(res.data)
+    def test_400_donor_adding_incomplete_item(self):
+        res = self.client().post('api/donors/1/items', headers=self.headers, json=self.incomplete_item)
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 422)
-    #     self.assertEqual(data['success'], False)
-    #     self.assertEqual(data['message'], "Unprocessable")
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], "Unprocessable")
 
     # DELETE ROUTE
     # def test_donor_tries_to_deletes_item(self):
@@ -196,7 +204,7 @@ class RecycleesTestCase(unittest.TestCase):
     # def test_add_donor_to_database(self):
     #     res = self.client().post('/api/donors', headers=self.headers, json=self.new_donor)
     #     data = json.loads(res.data)
-    #     does_item_with_id_exist = Donors.query.filter(Donors.id == data['new_donor_id']).first()
+    #     does_donor_with_id_exist = Donors.query.filter(Donors.id == data['new_donor_id']).first()
 
     #     self.assertEqual(res.status_code, 200)
     #     self.assertEqual(data['success'], True)
@@ -205,7 +213,7 @@ class RecycleesTestCase(unittest.TestCase):
     #     self.assertEqual(data['new_donor']['last_name'], self.new_donor['last_name'])
     #     self.assertEqual(data['new_donor']['city'], self.new_donor['city'])
     #     self.assertEqual(data['new_donor']['state'], self.new_donor['state'])
-    #     self.assertTrue(does_item_with_id_exist)
+    #     self.assertTrue(does_donor_with_id_exist)
 
     def test_422_donor_could_not_be_added_to_database(self):
         res = self.client().post('/api/donors', headers=self.headers)
@@ -219,7 +227,7 @@ class RecycleesTestCase(unittest.TestCase):
     # def test_add_donee_to_database(self):
     #     res = self.client().post('/api/donees', headers=self.headers, json=self.new_donee)
     #     data = json.loads(res.data)
-    #     does_item_with_id_exist = Donees.query.filter(Donees.id == data['new_donee_id']).first()
+    #     does_donee_with_id_exist = Donees.query.filter(Donees.id == data['new_donee_id']).first()
 
     #     self.assertEqual(res.status_code, 200)
     #     self.assertEqual(data['success'], True)
@@ -228,7 +236,7 @@ class RecycleesTestCase(unittest.TestCase):
     #     self.assertEqual(data['new_donee']['last_name'], self.new_donee['last_name'])
     #     self.assertEqual(data['new_donee']['city'], self.new_donee['city'])
     #     self.assertEqual(data['new_donee']['state'], self.new_donee['state'])
-    #     self.assertTrue(does_item_with_id_exist)
+    #     self.assertTrue(does_donee_with_id_exist)
 
     def test_400_donee_could_not_be_added_to_database(self):
         res = self.client().post('/api/donees', headers=self.headers, json=self.new_donee_missing_data)
