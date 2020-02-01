@@ -39,10 +39,11 @@ def create_app(test_config=None):
                     'items': items
                 }), 200
             else:
-            # return max of 10 items which are not claimed yet
+                # return max of 10 items which are not claimed yet
                 return jsonify({
                     'success': True,
-                    'message': 'These items are up for grabs! Sign in to claim.',
+                    'message': 'These items are up for grabs! Sign in \
+                                to claim.',
                     'items': items
                 }), 200
         except Exception:
@@ -76,7 +77,6 @@ def create_app(test_config=None):
             except Exception:
                 abort(404)
 
-
     # Route for signed in donor to add a new item to database
     @app.route("/api/donors/<int:user_id>/items", methods=["POST"])
     @cross_origin(headers=["Content-Type", "Authorization"])
@@ -89,16 +89,18 @@ def create_app(test_config=None):
 
             if body is None:
                 abort(400)
-            
-            item_name = body.get('item_name', '') 
-            brand = body.get('brand', '') 
-            category = body.get('category', '') 
-            condition = body.get('condition', '') 
-            description = body.get('description', '') 
-            delivery = body.get('delivery', '') 
+
+            item_name = body.get('item_name', '')
+            brand = body.get('brand', '')
+            category = body.get('category', '')
+            condition = body.get('condition', '')
+            description = body.get('description', '')
+            delivery = body.get('delivery', '')
             donor = user_id
 
-            if (item_name == '' or brand == '' or category == '' or condition == '' or delivery == ''):
+            if (item_name == '' or brand == '' or
+                    category == '' or
+                    condition == '' or delivery == ''):
                 abort(422)
 
             try:
@@ -141,8 +143,7 @@ def create_app(test_config=None):
 
                 return jsonify({
                     'success': True,
-                    'deleted_item': item.format(),
-                    'deleted_item_id': item.id
+                    'deleted_item': item.format()
                 }), 200
             except Exception:
                 abort(422)
@@ -163,7 +164,7 @@ def create_app(test_config=None):
 
             if (body is {}):
                 abort(400)
-            
+
             try:
                 # replace old instance data with new from PATCH request
                 item.item_name = body['item_name']
@@ -218,12 +219,6 @@ def create_app(test_config=None):
             except Exception:
                 abort(404)
 
-        # return error if donor does not have the permission to see item(s)
-        raise AuthError({
-            "code": "Unauthorized",
-            "description": "You don't have access to this resource"
-        }, 403)
-
     # Route for signed in donee to claim an unclaimed item
     @app.route("/api/donees/<int:user_id>/items/<int:item_id>",
                methods=["PATCH"])
@@ -250,15 +245,9 @@ def create_app(test_config=None):
             except Exception:
                 abort(404)
 
-        # return error if donor does not have the permission to edit item(s)
-        raise AuthError({
-            "code": "Unauthorized",
-            "description": "You don't have access to this resource"
-        }, 403)
-
 
 # ----------------------------------------------------------------------------#
-# Donee + Donor creation  routes
+# Donee + Donor creation routes
 # ----------------------------------------------------------------------------#
 
     # Route for adding a donor to database
@@ -270,29 +259,25 @@ def create_app(test_config=None):
             # get json data from user
             body = request.get_json()
 
-            if body is None:
+            if body is {}:
                 abort(400)
 
-            user_name = body.get('user_name', '') 
+            user_name = body.get('user_name', '')
             first_name = body.get('first_name', '')
             last_name = body.get('last_name', '')
             state = body.get('state', '')
             city = body.get('city', '')
 
-
-            if (user_name == '' or first_name == '' or last_name == '' or state == '' or city == ''):
-                abort(422)
+            # create new Donor instance
+            new_donor = Donors(
+                user_name=user_name,
+                first_name=first_name,
+                last_name=last_name,
+                state=state,
+                city=city
+            )
 
             try:
-                # create new Donor instance
-                new_donor = Donors(
-                    user_name=user_name,
-                    first_name=first_name,
-                    last_name=last_name,
-                    state=state,
-                    city=city
-                )
-
                 new_donor.insert()
 
                 return jsonify({
@@ -300,7 +285,7 @@ def create_app(test_config=None):
                     'new_donor': new_donor.format(),
                     'new_donor_id': new_donor.id
                 }), 200
-                
+
             except Exception:
                 abort(422)
 
@@ -316,27 +301,29 @@ def create_app(test_config=None):
             if body is None:
                 abort(400)
 
-            user_name = body.get('user_name', '') 
+            user_name = body.get('user_name', '')
             first_name = body.get('first_name', '')
             last_name = body.get('last_name', '')
             state = body.get('state', '')
             city = body.get('city', '')
             organization = body.get('organization', '')
 
-            if (user_name == '' or first_name == '' or last_name == '' or state == '' or city == ''):
+            if (user_name == '' or first_name == '' or last_name == '' or
+                    state == '' or city == ''):
+                print('submitted empty data!')
                 abort(422)
 
-            try:
-                # create new Donee instance
-                new_donee = Donees(
-                    user_name=user_name,
-                    first_name=first_name,
-                    last_name=last_name,
-                    state=state,
-                    city=city,
-                    organization=organization
-                )
+            # create new Donee instance
+            new_donee = Donees(
+                user_name=user_name,
+                first_name=first_name,
+                last_name=last_name,
+                state=state,
+                city=city,
+                organization=organization
+            )
 
+            try:
                 new_donee.insert()
 
                 return jsonify({
@@ -347,12 +334,6 @@ def create_app(test_config=None):
 
             except Exception:
                 abort(422)
-
-        # return error if donor does not have the permission to edit item(s)
-        raise AuthError({
-            "code": "Unauthorized",
-            "description": "You don't have access to this resource"
-        }, 403)
 
 
 # ----------------------------------------------------------------------------#
