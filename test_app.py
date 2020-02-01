@@ -88,21 +88,21 @@ class RecycleesTestCase(unittest.TestCase):
     # 
     # /////////////////////////////////////////////////////////////////
 
-    # def test_get_ten_items_from_public_route(self):
-    #     res = self.client().get('/api/public')
-    #     data = json.loads(res.data)
+    def test_get_ten_items_from_public_route(self):
+        res = self.client().get('/api/public')
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertTrue(len(data['items']) > -1)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['items']) > -1)
 
 
-    # def test_404_fail_to_get_item_list(self):
-    #     res = self.client().get('/api/public/items')
-    #     data = json.loads(res.data)
+    def test_404_fail_to_get_item_list(self):
+        res = self.client().get('/api/public/items')
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 404)
-    #     self.assertEqual(data['success'], False)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
 
 
     # /////////////////////////////////////////////////////////////////
@@ -112,22 +112,22 @@ class RecycleesTestCase(unittest.TestCase):
     # /////////////////////////////////////////////////////////////////
 
     # GET ROUTE
-    # def test_get_list_of_items_posted_by_donor(self):
-    #     res = self.client().get('/api/donors/1/items', headers=self.headers)
-    #     data = json.loads(res.data)
+    def test_get_list_of_items_posted_by_donor(self):
+        res = self.client().get('/api/donors/1/items', headers=self.headers)
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertIsInstance(data['items'], list)
-    #     self.assertEqual(data['items'][0] is not None, data['items'][0]['donor'] is 1)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertIsInstance(data['items'], list)
+        self.assertEqual(data['items'][0] is not None, data['items'][0]['donor'] is 1)
 
-    # def test_401_is_donor_authorized_to_get_own_list_of_items(self):
-    #     res = self.client().get('/api/donors/1/items', headers={'Content-Type': 'application/json'})
-    #     data = json.loads(res.data)
+    def test_401_is_donor_authorized_to_get_own_list_of_items(self):
+        res = self.client().get('/api/donors/1/items', headers={'Content-Type': 'application/json'})
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 401)
-    #     self.assertEqual(data['success'], False)
-    #     self.assertEqual(data['message'], "Authorization header is expected")
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], "Authorization header is expected")
 
     # POST ROUTE
     # def test_donor_adds_new_item(self):
@@ -193,19 +193,19 @@ class RecycleesTestCase(unittest.TestCase):
     # /////////////////////////////////////////////////////////////////
 
     # POST Donor route
-    def test_add_donor_to_database(self):
-        res = self.client().post('/api/donors', headers=self.headers, json=self.new_donor)
-        data = json.loads(res.data)
-        does_item_with_id_exist = Donors.query.filter(Donors.id == data['new_donor_id']).first()
+    # def test_add_donor_to_database(self):
+    #     res = self.client().post('/api/donors', headers=self.headers, json=self.new_donor)
+    #     data = json.loads(res.data)
+    #     does_item_with_id_exist = Donors.query.filter(Donors.id == data['new_donor_id']).first()
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['new_donor']['user_name'], self.new_donor['user_name'])
-        self.assertEqual(data['new_donor']['first_name'], self.new_donor['first_name'])
-        self.assertEqual(data['new_donor']['last_name'], self.new_donor['last_name'])
-        self.assertEqual(data['new_donor']['city'], self.new_donor['city'])
-        self.assertEqual(data['new_donor']['state'], self.new_donor['state'])
-        self.assertTrue(does_item_with_id_exist)
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertEqual(data['new_donor']['user_name'], self.new_donor['user_name'])
+    #     self.assertEqual(data['new_donor']['first_name'], self.new_donor['first_name'])
+    #     self.assertEqual(data['new_donor']['last_name'], self.new_donor['last_name'])
+    #     self.assertEqual(data['new_donor']['city'], self.new_donor['city'])
+    #     self.assertEqual(data['new_donor']['state'], self.new_donor['state'])
+    #     self.assertTrue(does_item_with_id_exist)
 
     def test_422_donor_could_not_be_added_to_database(self):
         res = self.client().post('/api/donors', headers=self.headers)
@@ -216,19 +216,19 @@ class RecycleesTestCase(unittest.TestCase):
         self.assertEqual(data['message'], "Bad request")
 
     # POST Donee route
-    def test_add_donee_to_database(self):
-        res = self.client().post('/api/donees', headers=self.headers, json=self.new_donee)
-        data = json.loads(res.data)
-        does_item_with_id_exist = Donees.query.filter(Donees.id == data['new_donee_id']).first()
+    # def test_add_donee_to_database(self):
+    #     res = self.client().post('/api/donees', headers=self.headers, json=self.new_donee)
+    #     data = json.loads(res.data)
+    #     does_item_with_id_exist = Donees.query.filter(Donees.id == data['new_donee_id']).first()
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['new_donee']['user_name'], self.new_donee['user_name'])
-        self.assertEqual(data['new_donee']['first_name'], self.new_donee['first_name'])
-        self.assertEqual(data['new_donee']['last_name'], self.new_donee['last_name'])
-        self.assertEqual(data['new_donee']['city'], self.new_donee['city'])
-        self.assertEqual(data['new_donee']['state'], self.new_donee['state'])
-        self.assertTrue(does_item_with_id_exist)
+    #     self.assertEqual(res.status_code, 200)
+    #     self.assertEqual(data['success'], True)
+    #     self.assertEqual(data['new_donee']['user_name'], self.new_donee['user_name'])
+    #     self.assertEqual(data['new_donee']['first_name'], self.new_donee['first_name'])
+    #     self.assertEqual(data['new_donee']['last_name'], self.new_donee['last_name'])
+    #     self.assertEqual(data['new_donee']['city'], self.new_donee['city'])
+    #     self.assertEqual(data['new_donee']['state'], self.new_donee['state'])
+    #     self.assertTrue(does_item_with_id_exist)
 
     def test_400_donee_could_not_be_added_to_database(self):
         res = self.client().post('/api/donees', headers=self.headers, json=self.new_donee_missing_data)
@@ -237,8 +237,6 @@ class RecycleesTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], "Unprocessable")
-
-
 
 
 # Make the tests conveniently executable

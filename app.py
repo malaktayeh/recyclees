@@ -64,8 +64,8 @@ def create_app(test_config=None):
                 items = Items.query.filter(Items.donor == user_id) \
                         .join(Donors).all()
 
-                if items == []:
-                    abort(400)
+                if not items:
+                    raise Exception
 
                 result = [item.format() for item in items]
 
@@ -76,11 +76,6 @@ def create_app(test_config=None):
             except Exception:
                 abort(404)
 
-        # return error if donor does not have the permission to get items
-        raise AuthError({
-            "code": "Unauthorized",
-            "description": "You don't have access to this resource"
-        }, 401)
 
     # Route for signed in donor to add a new item to database
     @app.route("/api/donors/<int:user_id>/items", methods=["POST"])
@@ -90,18 +85,21 @@ def create_app(test_config=None):
         # check if user has the right to update items
         if requires_scope("update:items"):
             # get json data from user
-            body = request.get_json(silent=False)
+            body = request.get_json()
 
             if body is None:
                 abort(400)
             
-            item_name = body['item_name']
-            brand = body['brand']
-            category = body['category']
-            condition = body.get('condition', '')
-            description = body['description']
-            delivery = body['delivery']
+            item_name = body.get('item_name', '') 
+            brand = body.get('brand', '') 
+            category = body.get('category', '') 
+            condition = body.get('condition', '') 
+            description = body.get('description', '') 
+            delivery = body.get('delivery', '') 
             donor = user_id
+
+            if (item_name == '' or brand == '' or category == '' or condition == '' or delivery == ''):
+                abort(422)
 
             try:
                 # create new item instance
@@ -116,7 +114,6 @@ def create_app(test_config=None):
                 )
 
                 new_item.insert()
-                print(new_item)
 
                 return jsonify({
                     'success': True,
