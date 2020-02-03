@@ -398,4 +398,4 @@ Things that I want to add soon:
 
 
 ## License
-Project is licensed under the terms of [MIT](https://en.wikipedia.org/wiki/MIT_License)
+Project is licensed under the terms of [MIT](https://en.wikipedia.org/wiki/MIT_License).
