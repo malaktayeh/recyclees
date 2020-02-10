@@ -1,14 +1,14 @@
 import React, { Fragment } from "react";
 import { Container } from "react-bootstrap";
 
-import Hero from "../components/homehero";
-// import Content from "../components/Content";
+import Hero from "../components/homeHero";
+import Content from "../components/homeContent";
 
 const Home = () => (
   <Fragment>
     <Hero />
     <Container >
-      {/* <Content /> */}
+      <Content />
     </Container>
   </Fragment>
 );

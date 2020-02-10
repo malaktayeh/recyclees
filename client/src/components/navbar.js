@@ -1,5 +1,5 @@
 import React from "react";
-import Logo from "../assets/logo.png";
+import Logo from "../assets/logo_black_md.png";
 import { Navbar, Nav, NavDropdown, Button } from "react-bootstrap";
 
 function Navigation() {
