@@ -12,16 +12,19 @@
 /client/build
 
 # misc
-**/.DS_Store
-**/.env.local
-**/.env.development.local
-**/.env.test.local
-**/.env.production.local
+/client/.DS_Store
+/client/.env.local
+/client/.env.development.local
+/client/.env.test.local
+/client/.env.production.local
 
-**/npm-debug.log*
-**/yarn-debug.log*
-**/yarn-error.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # vs workspace settings
-**/.vscode
-**/*.code-workspace
+/server//.vscode
+/server/*.code-workspace
+
+/client/*.code-workspace
+
