@@ -3,7 +3,7 @@ This API was written for the CAPSTONE Udacity Project for the Full-Stack nanodeg
 
 
 ## Introduction
-An app with routes that performs CRUD operations on a Heroku PSQL database. Used [Auth0](https://auth0.com/ "Auth0's Homepage") for authentication.
+An app with routes that performs CRUD operations on a Render PSQL database. Used [Auth0](https://auth0.com/ "Auth0's Homepage") for authentication.
 
 
 ## Getting started
@@ -11,7 +11,7 @@ You have the following two options:
 
 #### Use the hosted API
 
-Base URL: https://recyclees.herokuapp.com/
+Base URL: **https://recyclees.herokuapp.com/** _(please wait a few minutes for the app to initialize!)_ :see_no_evil:
 
 
 #### Run locally
